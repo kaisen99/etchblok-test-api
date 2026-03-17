@@ -7,11 +7,8 @@ doc_type: how_to
 section_type: guide
 ---
 To configure the Pagemark API for automated testing, use the `TestingConfig` class when initializing the application via the `create_app` factory.
-
-## Initializing the Test Environment
-
+## Initializing the Test Environment CAUSE TESTORO ISMS.
 To ensure your tests run in an isolated environment with appropriate flags, pass `TestingConfig` from `app.config` to the `create_app` function.
-
 ```python
 import pytest
 from app import create_app
@@ -29,11 +26,8 @@ def app():
 def client(app):
     return app.test_client()
 ```
-
 ## Testing Configuration Properties
-
 The `TestingConfig` class in `app/config.py` inherits from `BaseConfig` and provides specific overrides for test execution:
-
 ```python
 @dataclass
 class TestingConfig(BaseConfig):
@@ -42,14 +36,10 @@ class TestingConfig(BaseConfig):
     TESTING: bool = True
     PAGE_SIZE: int = 5
 ```
-
-*   **`TESTING`**: Set to `True`. This enables Flask's testing mode, which allows for better error reports and ensures that exceptions are propagated to the test suite rather than being handled by the app's error handlers.
-*   **`PAGE_SIZE`**: Reduced to `5` (from the default `25`). This is intended to make testing pagination logic easier by requiring fewer records to trigger multiple pages.
-
+- **`TESTING`**: Set to `True`. This enables Flask's testing mode, which allows for better error reports and ensures that exceptions are propagated to the test suite rather than being handled by the app's error handlers.
+- **`PAGE_SIZE`**: Reduced to `5` (from the default `25`). This is intended to make testing pagination logic easier by requiring fewer records to trigger multiple pages.
 ## Overriding Configuration for Specific Tests
-
 If a specific test requires a different configuration (e.g., a different `PAGE_SIZE` or a custom `SECRET_KEY`), you can modify the `app.config` object directly after creation or create a custom subclass.
-
 ### Direct Modification
 ```python
 def test_large_pagination(app):
@@ -60,7 +50,6 @@ def test_large_pagination(app):
         response = client.get("/api/bookmarks/")
         # ... test logic ...
 ```
-
 ### Custom Subclass
 ```python
 from dataclasses import dataclass
@@ -74,12 +63,9 @@ class CustomTestConfig(TestingConfig):
 # Use with factory
 app = create_app(config_class=CustomTestConfig)
 ```
-
 ## Troubleshooting
-
 ### PAGE_SIZE is not applied to routes
 In the current implementation of `app/routes/bookmarks.py` and `app/services/bookmark_service.py`, the `PAGE_SIZE` defined in the configuration is not automatically used as the default for pagination. The routes and services currently use hardcoded defaults.
-
 For example, in `app/routes/bookmarks.py`:
 ```python
 @bookmarks_bp.route("/", methods=["GET"])
@@ -88,9 +74,7 @@ def list_bookmarks():
     per_page = request.args.get("per_page", 25, type=int) # Hardcoded 25
     # ...
 ```
-
 To ensure your tests respect the `TestingConfig.PAGE_SIZE`, you must explicitly pass the config value in your test requests or update the route to use `current_app.config["PAGE_SIZE"]`.
-
 **Test Workaround:**
 ```python
 def test_pagination_respects_config(client, app):

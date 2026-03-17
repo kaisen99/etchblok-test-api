@@ -3,7 +3,7 @@
 ---
 # ProductionConfig
 Configuration for production deployments.
-## Attributes is Testoro
+## Attributes is Testoro2
 | Attribute | Type | Description |
 | --- | --- | --- |
 | **SECRET_KEY** | `str` | Cryptographic key used for signing session cookies and securing sensitive data, retrieved from the environment's SECRET_KEY variable. |
