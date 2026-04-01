@@ -7,7 +7,7 @@ doc_type: how_to
 section_type: guide
 ---
 To configure the Pagemark API for automated testing, use the `TestingConfig` class when initializing the application via the `create_app` factory.
-## Initializing the Test Environment CAUSE TESTORO ISMS.
+## Initializing the Test Environment CAUSE TESTORO ISMS. yeah
 To ensure your tests run in an isolated environment with appropriate flags, pass `TestingConfig` from `app.config` to the `create_app` function.
 ```python
 import pytest
