@@ -1,0 +1,5 @@
+Normalize search queries before delegating
+
+BookmarkService.search now lowercases and strips its input. Empty
+queries short-circuit to an empty result list so the index isn't hit
+with junk. No callers need to change — signature is unchanged.

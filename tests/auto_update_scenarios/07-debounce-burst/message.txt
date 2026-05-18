@@ -1,0 +1,1 @@
+(burst scenario writes its own commit messages — this file is unused)

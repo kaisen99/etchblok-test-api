@@ -1,0 +1,5 @@
+Remove restore_bookmark endpoint
+
+Restoration is now handled by PATCH /api/bookmarks/<id> with a
+status field. The dedicated /restore endpoint and its service method
+are no longer needed.

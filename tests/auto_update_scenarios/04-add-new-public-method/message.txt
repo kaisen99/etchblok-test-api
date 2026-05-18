@@ -1,0 +1,4 @@
+Add bulk_delete_bookmarks endpoint
+
+POST /api/bookmarks/bulk-delete accepts {"ids": [...]} and soft-deletes
+each. Returns the count actually trashed. Skips missing IDs silently.

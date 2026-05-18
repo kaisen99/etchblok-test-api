@@ -1,0 +1,5 @@
+Support attaching tags on bookmark creation
+
+create_bookmark now accepts an optional tags list and applies each
+tag immediately. Backwards-compatible — existing callers continue to
+work with the same single-argument form.

@@ -1,0 +1,4 @@
+Rename BookmarkService.search to full_text_search
+
+Clearer name — distinguishes from SearchIndex.search and makes the
+public API surface read better in docs.

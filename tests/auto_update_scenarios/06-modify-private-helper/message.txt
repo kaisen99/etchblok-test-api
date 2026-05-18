@@ -1,0 +1,4 @@
+Bump LRU cache to 512 entries
+
+Private internal tuning — production showed the 256-entry cache was
+evicting hot bookmarks. No public API change.
