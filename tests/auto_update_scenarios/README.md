@@ -110,23 +110,57 @@ This force-pushes `main` back to `auto-update-test-baseline`. Safe
 because the repo is dedicated to testing — the script refuses to run
 if the repo name isn't `etchblok-test-api`.
 
-### Step B. Regenerate AND publish a clean baseline (Mode A only)
+### Step B. Reset the docs baseline (Mode A)
 
-Mode A assumes each scenario tests against pristine docs. After the
-reset, the source code is at baseline — but the **docs repo** still
-contains changes from prior scenarios you merged. Regenerate, then
-publish, to reset both:
+Mode A assumes each scenario tests against docs that match the baseline
+source. Two things must be true before running scenarios:
+
+- **The published docs branch reflects the baseline source** — the
+  auto-updater reads section content from that branch.
+- **The pointer is at the baseline** — `autodoc_auto_update_state` for
+  the test version must point at the baseline commit, or the first
+  scenario diffs from the wrong place.
+
+There are two ways to get there.
+
+#### Fast path — reseed the pointer (most runs)
+
+If the docs were generated from pristine baseline source and no
+auto-update PR has been *merged* into the docs branch, the published
+docs are already correct. Just move the pointer:
+
+1. Baseline commit: `git rev-parse auto-update-test-baseline`
+2. Write that SHA to `autodoc_auto_update_state` for the test version
+   (`project_id` + `version_id` match your `autodoc_pr_outcomes` rows):
+
+   ```bash
+   aws dynamodb put-item --region us-east-1 \
+     --table-name autodoc_auto_update_state \
+     --item '{
+       "project_id":      {"S": "<project_id>"},
+       "version_id":      {"S": "<version_id>"},
+       "last_commit_sha": {"S": "<baseline SHA>"},
+       "updated_at":      {"N": "0"}
+     }'
+   ```
+
+No regeneration, no waiting.
+
+#### Full path — regenerate + publish
+
+Only needed when the published docs do **not** match the baseline —
+they were generated while scenario changes were applied (the
+`BookmarkService` API ref says `full_text_search` instead of `search`),
+or a scenario's auto-update PR was merged into the docs branch.
 
 1. In the Etchblok UI, click **Regenerate** on the continuous version
 2. Wait for completion (~5-15 min)
-3. **Publish** the result, and make sure it lands on the docs branch
-   (merge the publish PR if publishing opens one)
+3. **Publish**, and make sure it lands on the docs branch (merge the
+   publish PR if publishing opens one) — the auto-updater reads content
+   from that branch, so the generation must actually be on it
 
-Step 3 is **required**, not optional. The auto-updater reads section
-content from the published docs branch — if the generation isn't on
-that branch, every scenario diffs against stale or empty docs.
-Regenerating also re-seeds `autodoc_auto_update_state` to the new
-generation commit, so the first scenario diffs from a known baseline.
+Regeneration re-seeds `autodoc_auto_update_state` for you, so you can
+skip the pointer write above.
 
 ### Step C. Run the scenarios
 
@@ -213,7 +247,8 @@ Between runs of `run-all.sh`, do:
 
 ```bash
 ./tests/auto_update_scenarios/reset.sh        # source repo → baseline
-# Then in the Etchblok UI: regenerate docs (Step B above)
+# Then do Step B — usually just reseed the pointer; regenerate only
+# if the docs no longer match the baseline.
 ```
 
 You do **not** need to manually delete anything from
