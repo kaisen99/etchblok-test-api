@@ -4,8 +4,8 @@ description: A deep dive into the scoring algorithm, tokenization process, and t
 code_symbols: [SYM#b0cc1ddc5c9e6b6675ff73174df52949062c8da5]
 section_id: 7e5c5e8c-02e7-4218-a7bc-66cddd4c6437_understanding_ranking_and_tokenization
 doc_type: explanation
-section_type: guide
 ---
+
 The `SearchIndex` class in `app/services/search_service.py` implements a custom, in-memory search engine. It uses a specific tokenization pipeline and a frequency-based ranking algorithm to provide full-text search capabilities for bookmarks.
 
 ## The Tokenization Pipeline
@@ -54,6 +54,7 @@ def search(self, query: str, limit: int = 20) -> List[Bookmark]:
     
     # ... retrieval and ranking logic ...
 ```
+The `limit` parameter specifies the maximum number of results to return, which is further capped by a system-defined maximum to prevent excessively large result sets.
 
 This design choice ensures high precision—results are guaranteed to contain all search terms—but it can lead to zero results for long, specific queries where a "fuzzy" or "OR" match might have been more helpful.
 

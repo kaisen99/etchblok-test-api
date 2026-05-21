@@ -4,8 +4,8 @@ description: A step-by-step guide to initializing the SearchIndex with a reposit
 code_symbols: [SYM#b0cc1ddc5c9e6b6675ff73174df52949062c8da5]
 section_id: 7052f0b4-b120-43e3-a2b0-70528c47b820_performing_your_first_search
 doc_type: tutorial
-section_type: guide
 ---
+
 In this tutorial, you will learn how to use the in-memory search capabilities of the codebase to index and retrieve bookmarks. You will build a script that initializes a repository, populates it with data, and executes a ranked search query using the `SearchIndex` service.
 
 ### Prerequisites
@@ -61,7 +61,7 @@ When `index_bookmark` is called, the `SearchIndex` performs the following:
 
 ### Step 3: Execute a Search Query
 
-Now that the index is populated, you can perform a search. The `search` method returns a list of `Bookmark` objects that match **all** tokens in your query.
+Now that the index is populated, you can perform a search. The `search` method returns a list of `Bookmark` objects that match **all** tokens in your query. The `limit` parameter specifies the maximum number of results to return, up to a system-defined maximum of 100.
 
 ```python
 # Execute a search for "python indexing"

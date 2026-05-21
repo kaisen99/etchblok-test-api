@@ -4,8 +4,8 @@ description: An introduction to the inverted index architecture used for bookmar
 code_symbols: [SYM#0f269a750bc62c4d874086090a88d14329456024, SYM#b0cc1ddc5c9e6b6675ff73174df52949062c8da5]
 section_id: 09cba1cd-3cfa-478e-bd2e-6be4d1ef25ae_overview_of_the_search_system
 doc_type: guide
-section_type: guide
 ---
+
 The search system in this application is powered by an in-memory inverted index implemented in the `SearchIndex` class within `app/services/search_service.py`. It provides full-text search capabilities across bookmark titles and descriptions, using a token-based retrieval strategy.
 
 ## Inverted Index Architecture
@@ -56,6 +56,7 @@ candidate_ids: Set[str] = self._index.get(tokens[0], set()).copy()
 for token in tokens[1:]:
     candidate_ids &= self._index.get(token, set())
 ```
+The final list of results is capped at a predefined maximum, even if a higher limit is requested.
 
 ### Ranking
 Once candidate bookmarks are retrieved from the repository, they are ranked using the `_rank_results` helper. The ranking score is determined by the total number of times the query tokens appear in the bookmark's title and description combined.
