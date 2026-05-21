@@ -20,6 +20,35 @@ mixed PR outcomes) is deferred until Mode A is reliable.
 | 05 | Modify body, same sig | `body_hash` diff, call-graph expansion | Yes |
 | 06 | Modify private helper | Private symbols filter | **No** (gap test) |
 | 07 | Debounce burst | 3 commits in 90s collapse to one run | Maybe (likely no public diff) |
+| 08 | PR refresh | 2 pushes, no merge between — same PR refreshed | Yes (one, refreshed) |
+
+---
+
+## How the single-PR model works
+
+The auto-updater keeps **one stable PR per version**, on the branch
+`etchblok/auto-update-{version}`. Each cycle rebuilds that branch from
+the published docs plus every doc change since the last merge,
+force-pushes it, and refreshes the existing PR (or opens it the first
+time).
+
+Two consequences for testing:
+
+- **The pointer advances only on merge.** `autodoc_auto_update_state`
+  — the commit the published docs reflect — moves forward *only* when a
+  PR is merged (the webhook does it). Creating or closing a PR does not
+  move it. So in Mode A you **must merge** each scenario's PR before the
+  next scenario, or the next diff runs from the same baseline and the
+  changes pile into one PR.
+
+- **Content is read from the published docs branch.** The agent edits
+  the live docs on that branch, not an internal snapshot. That is why
+  regenerating alone is not enough — you must also **publish** so the
+  branch reflects the generation (Step B).
+
+Scenario 08 pushes twice with no merge between to confirm the refresh
+path. Every other scenario merges immediately, so each gets its own
+fresh PR and never exercises the refresh.
 
 ---
 
@@ -81,17 +110,23 @@ This force-pushes `main` back to `auto-update-test-baseline`. Safe
 because the repo is dedicated to testing — the script refuses to run
 if the repo name isn't `etchblok-test-api`.
 
-### Step B. Regenerate docs to a clean baseline (Mode A only)
+### Step B. Regenerate AND publish a clean baseline (Mode A only)
 
 Mode A assumes each scenario tests against pristine docs. After the
 reset, the source code is at baseline — but the **docs repo** still
-contains changes from prior scenarios you merged. Regenerate to wipe
-that state:
+contains changes from prior scenarios you merged. Regenerate, then
+publish, to reset both:
 
 1. In the Etchblok UI, click **Regenerate** on the continuous version
 2. Wait for completion (~5-15 min)
-3. Optionally: merge the resulting publish PR into the docs repo so
-   the on-disk state matches DynamoDB
+3. **Publish** the result, and make sure it lands on the docs branch
+   (merge the publish PR if publishing opens one)
+
+Step 3 is **required**, not optional. The auto-updater reads section
+content from the published docs branch — if the generation isn't on
+that branch, every scenario diffs against stale or empty docs.
+Regenerating also re-seeds `autodoc_auto_update_state` to the new
+generation commit, so the first scenario diffs from a known baseline.
 
 ### Step C. Run the scenarios
 
@@ -99,24 +134,30 @@ that state:
 ./tests/auto_update_scenarios/run-all.sh
 ```
 
-The driver walks scenarios 01 → 07 in order. For each:
+The driver walks scenarios 01 → 08 in order. For each:
 
 1. Runs the scenario's `apply.sh` (modifies source files)
 2. Commits with the scenario's `message.txt`
 3. Pushes to `origin/main`
 4. Sleeps **7 minutes** (5-min debounce + up to 5-min poller)
 5. **Pauses** and prompts you to review the PR
-6. You merge the PR (or close it) before pressing enter
+6. You **merge** the PR before pressing enter — merging is what
+   advances the auto-update pointer (see "How the single-PR model
+   works"). If you skip it, the change folds into the next PR.
 
-Total wall time: ~50 minutes for all 7 scenarios.
+Scenario 08 is special — it pushes twice with no merge between, so it
+runs two cycles (~14 min) and pauses once in the middle.
 
-To skip ahead to a specific scenario (e.g., debugging just #5):
+Total wall time: ~70 minutes for all 8 scenarios.
+
+To skip ahead to a specific scenario (e.g., debugging just #8):
 
 ```bash
-./tests/auto_update_scenarios/run-all.sh 05-modify-body-same-sig
+./tests/auto_update_scenarios/run-all.sh 08-pr-refresh
 ```
 
-Scenarios before the named one are skipped.
+Scenarios before the named one are skipped — this is also how you run
+the PR-refresh test on its own.
 
 ### Step D. Inspect outcomes
 
@@ -146,15 +187,23 @@ During the 7-min sleep, watch these in another terminal/tab:
   `processing` then disappears (or stays as `completed`)
 - **Flyte console** — `poll_and_run_auto_updates` fires every 5 min;
   look for an invocation of `doc_auto_update_workflow`
-- **GitHub PR list** on the docs repo — the etchblok PR appears
-  (branch name like `etchblok/auto-update-{shortSha}`)
-- **DynamoDB** — `autodoc_pr_outcomes` should have a new row with
-  `status=open` after the workflow creates the PR
+- **GitHub PR list** on the docs repo — the etchblok PR appears on
+  branch `etchblok/auto-update-{version}` (one stable branch per
+  version, reused and force-pushed across cycles)
+- **DynamoDB** — `autodoc_pr_outcomes` should have a row with
+  `status=open` after the workflow creates the PR (upserted, so a
+  refreshed PR keeps the same row)
 
-After you merge or close the PR:
-- The webhook updates the row to `merged_clean`, `merged_edited`, or
-  `closed_unmerged`
-- The etchblok branch is auto-deleted
+After you merge the PR:
+- The webhook updates the row to `merged_clean` or `merged_edited`
+- The webhook advances `autodoc_auto_update_state.last_commit_sha` to
+  the commit the PR covered — this pointer move is what lets the next
+  scenario diff from a fresh baseline
+- The `etchblok/auto-update-{version}` branch is auto-deleted
+
+After you close a PR **without merging**:
+- The row becomes `closed_unmerged` and the pointer does **not** move —
+  the change correctly returns in the next cycle's PR
 
 ---
 
@@ -203,6 +252,22 @@ Probably accumulated state from a previous run. Did you reset between
 runs (Step A + Step B)? Run `reset.sh`, regenerate docs in the UI,
 then re-run.
 
+### Two PRs opened when scenario 08 expected one refreshed
+
+Push 2 was supposed to refresh push 1's PR, not open a new one. Either:
+
+1. **Push 1's PR was already merged** when push 2 ran — then a fresh PR
+   is correct. Don't merge push 1's PR until after push 2.
+2. **The single-PR path is broken** — check `_find_open_pr` in
+   `github_pr_creator.py` (branch-name mismatch, or the open-PR query
+   failing).
+
+### A scenario's change showed up in the next scenario's PR
+
+You skipped the merge. The pointer (`autodoc_auto_update_state`) only
+advances on merge, so the unmerged change stays in the diff window and
+folds into the next PR. Merge each scenario's PR before continuing.
+
 ### `reset.sh` refuses to run
 
 The script has a sanity check that the working repo's basename is
@@ -233,6 +298,10 @@ heredoc in the scenario's `apply.sh` and adjust the anchor strings.
 | `0N-*/apply.sh` | Mutates source files for scenario N |
 | `0N-*/message.txt` | Commit message for scenario N |
 | `0N-*/expected.md` | Human-readable expected pipeline behavior |
+
+Scenario `08-pr-refresh` is the exception: it ships `apply-1.sh` +
+`apply-2.sh` and `message-1.txt` + `message-2.txt` (two pushes) instead
+of a single `apply.sh` / `message.txt`.
 
 ---
 

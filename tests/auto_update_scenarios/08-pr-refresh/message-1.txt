@@ -1,0 +1,4 @@
+Cap SearchIndex.search results at MAX_SEARCH_RESULTS
+
+Even when a caller passes a larger limit, results are now bounded by
+the module-level MAX_SEARCH_RESULTS ceiling.

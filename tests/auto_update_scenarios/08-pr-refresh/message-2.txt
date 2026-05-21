@@ -1,0 +1,4 @@
+Weight bookmark titles in the search index
+
+index_bookmark now tokenizes the title twice, so title matches rank
+above description-only matches.
