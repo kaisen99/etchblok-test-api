@@ -41,7 +41,7 @@ def restore(self) -> None:
 
 ## Soft-Deletion via the Service Layer
 
-The `BookmarkService` acts as the orchestrator for these state changes. When a delete request is received (typically via the `DELETE /api/bookmarks/<id>` endpoint), the service does not invoke a removal from the database. Instead, it performs a soft-delete by updating the bookmark's status.
+The `BookmarkService` acts as the orchestrator for these state changes. When a delete request is received (typically via the `DELETE /api/bookmarks/<id>` endpoint), the service does not invoke a removal from the database. Instead, it performs a soft-delete by updating the bookmark's status. Similarly, archiving a bookmark is also handled at this layer.
 
 ```python
 # app/services/bookmark_service.py
@@ -55,6 +55,16 @@ def delete_bookmark(self, bookmark_id: str) -> bool:
     self._repo.save_bookmark(bookmark)
     self._cache.invalidate(bookmark_id)
     return True
+
+def archive_bookmark(self, bookmark_id: str) -> Optional[Bookmark]:
+    """Archive a bookmark."""
+    bookmark = self._repo.get_bookmark(bookmark_id)
+    if not bookmark:
+        return None
+    bookmark.archive()
+    self._repo.save_bookmark(bookmark)
+    self._cache.invalidate(bookmark_id)
+    return bookmark
 ```
 
 This implementation ensures that:
