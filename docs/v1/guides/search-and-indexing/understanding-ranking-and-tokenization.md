@@ -10,7 +10,7 @@ The `SearchIndex` class in `app/services/search_service.py` implements a custom,
 
 ## The Tokenization Pipeline
 
-The `SearchIndex` processes both bookmark content and search queries through a consistent tokenization pipeline defined in the `_tokenize` method. This ensures that the search is case-insensitive and ignores common noise words.
+The `SearchIndex` processes both bookmark content and search queries through a consistent tokenization pipeline defined in the `_tokenize` method. When indexing bookmarks, the title content is tokenized twice, effectively giving it increased weight in the index. This ensures that the search is case-insensitive and ignores common noise words.
 
 The pipeline consists of three primary steps:
 1.  **Normalization**: The input text is converted to lowercase using `text.lower()`.
@@ -33,7 +33,7 @@ This approach prioritizes simplicity and speed for small datasets. However, beca
 
 ## Search Strategy: Boolean AND Logic
 
-When a user performs a search, the `SearchIndex.search` method applies a strict "AND" strategy. For a bookmark to be considered a candidate result, it must contain **all** tokens present in the search query.
+When a user performs a search, the `SearchIndex.search` method applies a strict "AND" strategy. For a bookmark to be considered a candidate result, it must contain **all** tokens present in the search query. The search results are also capped at a maximum of 100 entries, regardless of the requested `limit`.
 
 The implementation uses set intersection to find matching bookmark IDs:
 
@@ -82,7 +82,7 @@ The scoring logic is straightforward:
 
 ### Tradeoffs in Ranking
 While effective for simple use cases, this frequency-based ranking has specific characteristics:
--   **Field Weighting**: There is no distinction between a token appearing in the `title` versus the `description`. A word appearing five times in a long description will outweigh a word appearing once in a title, even though titles are typically more indicative of content.
+-   **Field Weighting**: While the `_rank_results` method itself does not explicitly distinguish between tokens appearing in the `title` versus the `description`, the indexing process (via `index_bookmark`) includes the title content twice. This implicitly gives tokens found in the title more weight in the index. Consequently, a word appearing five times in a long description might still outweigh a word appearing once in a title, but the title's contribution is enhanced during indexing.
 -   **Document Length Bias**: Longer descriptions naturally have a higher probability of containing more occurrences of a token, which can bias the results toward bookmarks with verbose descriptions.
 -   **Performance**: The scoring happens at query time by iterating over the full text of every candidate bookmark. For a large number of candidates, this `text.count(t)` operation becomes a bottleneck.
 

@@ -55,13 +55,13 @@ search_index.index_bookmark(bookmark)
 ```
 
 When `index_bookmark` is called, the `SearchIndex` performs the following:
-1.  **Tokenization**: It combines the `title` and `description` into a single string.
+1.  **Tokenization**: It combines the `title` (which is included twice to give it more weight in ranking) and `description` into a single string.
 2.  **Normalization**: It converts the text to lowercase and removes stop words (like "the", "is", "of").
 3.  **Mapping**: It adds the bookmark's ID to the set of IDs associated with each unique token found.
 
 ### Step 3: Execute a Search Query
 
-Now that the index is populated, you can perform a search. The `search` method returns a list of `Bookmark` objects that match **all** tokens in your query.
+Now that the index is populated, you can perform a search. The `search` method returns a list of `Bookmark` objects that match **all** tokens in your query. Note that the `limit` parameter is capped at `MAX_SEARCH_RESULTS` (currently 100) to prevent excessively large result sets.
 
 ```python
 # Execute a search for "python indexing"

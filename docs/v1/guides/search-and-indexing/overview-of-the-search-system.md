@@ -22,7 +22,7 @@ class SearchIndex:
         self._rebuild()
 ```
 
-When a bookmark is indexed, its title and description are combined and broken down into tokens. Each token then becomes a key in the `_index`, and the bookmark's ID is added to the associated set.
+When a bookmark is indexed, its title is included twice along with its description, and then broken down into tokens. Each token then becomes a key in the `_index`, and the bookmark's ID is added to the associated set.
 
 ## The Tokenization Pipeline
 
@@ -44,7 +44,7 @@ def _tokenize(self, text: str) -> List[str]:
 
 ## Search and Ranking Logic
 
-The `search` method employs an **AND strategy**. For a bookmark to be considered a match, it must contain *all* tokens present in the search query.
+The `search` method employs an **AND strategy**. For a bookmark to be considered a match, it must contain *all* tokens present in the search query. The number of results returned is capped by the `limit` parameter, but will not exceed `MAX_SEARCH_RESULTS` (currently 100).
 
 ### Retrieval
 The system retrieves the set of IDs for the first token and then performs a set intersection with the sets of IDs for all subsequent tokens:

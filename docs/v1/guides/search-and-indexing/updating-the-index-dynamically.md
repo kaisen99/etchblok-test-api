@@ -26,7 +26,7 @@ bookmark = Bookmark(
 search_index.index_bookmark(bookmark)
 ```
 
-The `index_bookmark` method tokenizes the `title` and `description` fields, converts them to lowercase, and maps each token to the bookmark's ID.
+The `index_bookmark` method tokenizes the `title` field twice (to give it higher weighting) and the `description` field once, converts them to lowercase, and maps each token to the bookmark's ID.
 
 ## Removing a Bookmark from the Index
 To completely remove a bookmark from the search results, use the `remove_bookmark` method with the bookmark's unique ID.
