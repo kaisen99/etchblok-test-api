@@ -17,21 +17,3 @@ Preset colours available for tags.
 | **GRAY** | `string` = gray | Represents the gray color preset for tag styling. |
 
 ---
-
-## Constructor
-
-### Signature
-
-```python
-def TagColor(
-    value: string
-) - > null
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| **value** | `string` | The string representation of the preset color used for tag styling |
-
----

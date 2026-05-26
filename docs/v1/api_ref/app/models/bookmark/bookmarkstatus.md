@@ -10,7 +10,7 @@ Visibility status of a bookmark.
 | Attribute | Type | Description |
 |----------|------|-------------|
 | **ACTIVE** | `string` = active | Indicates the bookmark is currently visible and accessible in the primary user interface. |
-| **ARCHIVED** | `string` = archived | Indicates the bookmark has been moved to long-term storage and is hidden from the main list. |
+| **ARCHIVED** | `string` = archived | Indicates the bookmark has been moved to long-term storage and is hidden from the main active list. |
 | **TRASHED** | `string` = trashed | Indicates the bookmark is marked for deletion and resides in the recycle bin. |
 
 ---

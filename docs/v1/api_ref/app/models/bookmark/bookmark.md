@@ -9,12 +9,12 @@ A saved URL with metadata, tags, and full-text content.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
+| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier. |
 | **url** | `str` | The bookmarked URL. |
 | **title** | `str` | Human-readable title. |
 | **description** | `str` | Optional longer description. |
 | **tags** | `List[str]` = [] | List of tag IDs associated with this bookmark. |
 | **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | Current visibility status. |
-| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier. |
 | **created_at** | `datetime` = datetime.utcnow | Timestamp of creation. |
 | **updated_at** | `datetime` = datetime.utcnow | Timestamp of last modification. |
 | **metadata** | `Dict[str, Any]` = \{\} | Arbitrary key/value pairs for extensibility. |
@@ -29,14 +29,10 @@ A saved URL with metadata, tags, and full-text content.
 def Bookmark(
     url: str,
     title: str,
-    description: str = "",
+    description: str,
     tags: List[str] = [],
-    status: [BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus) = BookmarkStatus.ACTIVE,
-    id: str = uuid.uuid4().hex[:12],
-    created_at: datetime = datetime.utcnow,
-    updated_at: datetime = datetime.utcnow,
-    metadata: Dict[str, Any] = {}
-)
+    status: [BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus) = BookmarkStatus.ACTIVE
+) - > null
 ```
 
 ### Parameters
@@ -44,14 +40,10 @@ def Bookmark(
 | Name | Type | Description |
 |------|------|-------------|
 | **url** | `str` | The bookmarked URL. |
-| **title** | `str` | Human-readable title. |
-| **description** | `str` = "" | Optional longer description. |
+| **title** | `str` | Human-readable title for the bookmark. |
+| **description** | `str` | Optional longer description of the bookmark content. |
 | **tags** | `List[str]` = [] | List of tag IDs associated with this bookmark. |
-| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | Current visibility status. |
-| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier. |
-| **created_at** | `datetime` = datetime.utcnow | Timestamp of creation. |
-| **updated_at** | `datetime` = datetime.utcnow | Timestamp of last modification. |
-| **metadata** | `Dict[str, Any]` = \{\} | Arbitrary key/value pairs for extensibility. |
+| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | The initial visibility status of the bookmark. |
 
 ---
 
@@ -65,10 +57,16 @@ def Bookmark(
 
 ```python
 @classmethod
-def archive()
+def archive() - > null
 ```
 
 Move the bookmark to the archive.
+
+#### Returns
+
+| Type | Description |
+|------|-------------|
+| `null` | Nothing |
 
 ---
 
@@ -76,10 +74,16 @@ Move the bookmark to the archive.
 
 ```python
 @classmethod
-def trash()
+def trash() - > null
 ```
 
 Soft-delete the bookmark by moving it to the trash.
+
+#### Returns
+
+| Type | Description |
+|------|-------------|
+| `null` | Nothing |
 
 ---
 
@@ -87,10 +91,16 @@ Soft-delete the bookmark by moving it to the trash.
 
 ```python
 @classmethod
-def restore()
+def restore() - > null
 ```
 
 Restore a trashed or archived bookmark to active status.
+
+#### Returns
+
+| Type | Description |
+|------|-------------|
+| `null` | Nothing |
 
 ---
 
@@ -109,13 +119,13 @@ Attach a tag. Returns False if already present.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `string` | The unique identifier of the tag to be associated with this bookmark |
+| **tag_id** | `string` | The unique identifier of the tag to associate with this bookmark |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully added, False if the tag already existed in the bookmark's tag list |
+| `boolean` | True if the tag was successfully added, False if the tag ID already exists in the tags list |
 
 ---
 
@@ -134,13 +144,13 @@ Detach a tag. Returns False if not found.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `string` | The unique identifier of the tag to be removed from this bookmark |
+| **tag_id** | `string` | The unique identifier of the tag to remove from this bookmark |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully removed, False if the tag was not found in the bookmark's tag list |
+| `boolean` | True if the tag was successfully removed, False if the tag ID was not found in the tags list |
 
 ---
 
@@ -157,7 +167,7 @@ Serialise to a plain dictionary for JSON responses.
 
 | Type | Description |
 |------|-------------|
-| `object` | A dictionary containing the bookmark's attributes including ID, URL, title, status, and timestamps |
+| `object` | A dictionary representation of the bookmark including its ID, URL, title, status, and timestamps |
 
 ---
 

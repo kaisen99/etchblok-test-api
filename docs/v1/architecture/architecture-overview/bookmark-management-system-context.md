@@ -1,26 +1,19 @@
 ---
-{title: Bookmark Management System Context, description: The Bookmark Management System Context diagram illustrates the high-level interactions between the Bookmark API and its external environment. The Bookmark API..., displayed_sidebar: architectureSidebar, section_type: architecture}
+{title: Bookmark Management System Context, description: This system context diagram depicts the as the central system managing bookmark data. It interacts with an who consumes the REST API to perform CRUD operations..., displayed_sidebar: architectureSidebar, section_type: architecture}
 ---
 # Bookmark Management System Context
 
-The Bookmark Management System Context diagram illustrates the high-level interactions between the **Bookmark API** and its external environment. 
+This system context diagram depicts the [Bookmark API Architecture](/architecture/architecture-overview/bookmark-api-internal-component-architecture) as the central system managing bookmark data. It interacts with an End User who consumes the REST API to perform CRUD operations on bookmarks, tags, and collections. The system relies on three primary external-facing components (currently implemented as in-memory stubs or internal services): a [Data Persistence](/guides/data-persistence) for persistent storage of domain entities, an [Search Architecture](/guides/search-indexing/search-architecture) for full-text indexing and retrieval, and a [Cache Configuration](/guides/configuration-environments/optimizing-cache-for-environments) to optimize performance for frequently accessed resources.
 
-The **Bookmark API** is a Flask-based REST service that provides endpoints for managing bookmarks, tags, and collections. It serves as the central hub for business logic, orchestrating data between the user and various storage and utility services.
-
-Key interactions include:
-- **End Users** interact with the system via a RESTful API to perform CRUD operations on bookmarks, organize them into collections, and apply tags.
-- The **Database** (represented in the code by a PostgreSQL connection stub) is used for persistent storage of domain entities like bookmarks, tags, and collections.
-- An **External Search Service** (implemented as an in-memory inverted index in the current codebase) provides full-text search capabilities across bookmark titles and descriptions.
-- A **Cache Service** (implemented as an in-memory LRU cache) is used to store frequently accessed bookmarks, reducing the load on the primary database and improving response times for read operations.
-
-While the current implementation uses in-memory stubs for the database, search, and cache components, the architecture is designed to integrate with external systems like PostgreSQL, Elasticsearch, and Redis in a production environment. [BookmarkService](/api_ref/app/services/bookmark/service/bookmarkservice) acts as a facade that abstracts these integrations from the route handlers.
+The architecture follows a clean separation of concerns, where the API layer delegates business logic to a service layer, which in turn orchestrates interactions with the repository (database), search index, and cache. While the current implementation uses in-memory versions of these dependencies, the codebase includes configuration and connection stubs (e.g., for PostgreSQL) to facilitate future integration with real external systems.
 
 **Key Architectural Findings:**
-- The system is a Flask-based REST API following a layered architecture (Routes, Services, Repository, Models).
-- Persistence is managed through a repository pattern, with stubs for a PostgreSQL database connection pool.
-- Full-text search is provided by a dedicated SearchIndex service that maintains an inverted index of bookmark content.
-- Performance is optimized using an LRU (Least Recently Used) cache for bookmark lookups.
-- The API includes internal health and readiness probes intended for use by load balancers and monitoring systems.
+- The system is a Flask-based REST API providing endpoints for bookmarks, tags, and collections management.
+- A service layer (BookmarkService) acts as a facade, orchestrating logic between the API routes and the data/search layers.
+- Data persistence is abstracted through a repository pattern, currently using an in-memory store but designed for a PostgreSQL-like database.
+- Full-text search is provided by an inverted index (SearchIndex) that tokenizes bookmark titles and descriptions.
+- Performance is enhanced by an internal LRU cache that stores recently accessed bookmark objects.
+- Internal health and diagnostic endpoints are provided for monitoring and readiness checks.
 
 ```mermaid
 flowchart LR
@@ -28,10 +21,10 @@ flowchart LR
     API[["Bookmark API"]]
     DB[(Database)]
     Search([External Search Service])
-    Cache([Cache Service])
+    Cache([Cache Provider])
 
     User -- "Manages bookmarks, tags, and collections via REST API" --> API
-    API -- "Persists domain data" --> DB
-    API -- "Indexes and searches bookmark content" --> Search
+    API -- "Persists domain entities" --> DB
+    API -- "Indexes content for full-text search" --> Search
     API -- "Caches frequently accessed bookmarks" --> Cache
 ```

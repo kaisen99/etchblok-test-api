@@ -5,7 +5,7 @@
 
 List all tags, sorted alphabetically.
 
-Retrieves a complete list of all available tags, sorted in alphabetical order.
+Retrieves a complete list of all existing tags, sorted in alphabetical order.
 
 ## Endpoint
 
@@ -17,4 +17,4 @@ GET /api/tags/
 
 | Status | Description |
 |--------|-------------|
-| **200** | Successfully retrieved the list of tags. Returns `object`. |
+| **200** | Successfully retrieved the list of tags. Returns `application/json`. |

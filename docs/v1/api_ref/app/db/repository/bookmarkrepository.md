@@ -9,8 +9,8 @@ In-memory storage for bookmarks, tags, and collections.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal dictionary mapping unique bookmark IDs to Bookmark objects for persistent in-memory storage. |
-| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal dictionary mapping unique tag IDs to Tag objects used to manage and retrieve bookmark metadata. |
+| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal dictionary mapping unique bookmark IDs to Bookmark objects for in-memory storage and retrieval. |
+| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal dictionary mapping unique tag IDs to Tag objects used to manage bookmark categorization. |
 | **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal dictionary mapping unique collection IDs to Collection objects for organizing bookmarks into groups. |
 
 ---
@@ -104,7 +104,7 @@ Hard-delete a bookmark. Returns True if it existed.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be deleted |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be permanently removed |
 
 #### Returns
 
@@ -133,7 +133,7 @@ Return a paginated slice of bookmarks.
 |------|------|-------------|
 | **page** | `int` = 1 | The 1-based page index for pagination |
 | **per_page** | `int` = 25 | The maximum number of bookmark items to return per page |
-| **status** | `Optional[str]` = None | An optional filter to restrict results by status, such as 'active', 'archived', or 'trashed' |
+| **status** | `Optional[str]` = None | An optional filter string to restrict results by status, such as 'active', 'archived', or 'trashed' |
 
 #### Returns
 
@@ -233,7 +233,7 @@ Hard-delete a tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to be deleted |
+| **tag_id** | `str` | The unique identifier of the tag to be permanently removed |
 
 #### Returns
 
@@ -256,7 +256,7 @@ Return all tags.
 
 | Type | Description |
 |------|-------------|
-| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list containing all Tag objects stored in the repository |
+| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all Tag objects stored in the repository |
 
 ---
 
@@ -325,7 +325,7 @@ Hard-delete a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the collection to be deleted |
+| **collection_id** | `str` | The unique identifier of the collection to be permanently removed |
 
 #### Returns
 
@@ -348,6 +348,6 @@ Return all collections.
 
 | Type | Description |
 |------|-------------|
-| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list containing all Collection objects stored in the repository |
+| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all Collection objects stored in the repository |
 
 ---

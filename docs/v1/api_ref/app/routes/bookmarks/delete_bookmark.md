@@ -17,11 +17,11 @@ DELETE /api/bookmarks/< bookmark_id >
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `string` | The unique identifier of the bookmark to be soft-deleted. |
+| **bookmark_id** | `string` | The unique identifier of the bookmark to be moved to the trash. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **204** | The bookmark was successfully soft-deleted. |
-| **404** | The bookmark with the specified ID could not be found. Returns `object`. |
+| **404** | The specified bookmark identifier does not exist in the system. Returns `object`. |

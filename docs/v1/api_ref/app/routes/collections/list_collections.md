@@ -5,7 +5,7 @@
 
 List all collections with their bookmark counts.
 
-Retrieves a list of all existing bookmark collections including their associated metadata and bookmark counts.
+Retrieves a list of all existing bookmark collections along with their associated metadata and bookmark counts.
 
 ## Endpoint
 

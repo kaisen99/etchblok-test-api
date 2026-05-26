@@ -3,10 +3,7 @@
 ---
 # create_app
 
-Application factory.
-
-Creates and configures the Flask application, registers blueprints,
-and initialises the in-memory database.
+Application factory. Creates and configures the Flask application, registers blueprints, and initialises the in-memory database.
 
 ```python
 def create_app(
@@ -20,7 +17,7 @@ Application factory. Creates and configures the Flask application, registers blu
 
 | Name | Type | Description |
 |------|------|-------------|
-| **config_class** | `Config` = DevelopmentConfig | Configuration class to use for setting application-wide settings and environment variables. |
+| **config_class** | `Config` = DevelopmentConfig | The configuration class used to set application-wide settings and environment variables. |
 
 ## Returns
 

@@ -1,109 +1,105 @@
 ---
 title: Filtering and Pagination
-description: Learn how to use the repository to fetch paginated results and filter bookmarks by status or tags.
+description: A guide to using the repository's built-in pagination and status-based filtering to efficiently query large datasets.
 code_symbols: [SYM#adb8232356346a5957ff3a1a1b7ff70581f37649]
-section_id: 68589dcd-b7b8-458c-ae78-a1ccd8960a2f_filtering_and_pagination
-doc_type: how_to
+section_id: 9996ea84-6674-4de2-92b6-3aedf47be263_filtering_and_pagination
+doc_type: guide
 section_type: guide
 ---
-To fetch paginated results and filter bookmarks by status or tags in this project, you primarily interact with the `BookmarkRepository` via the `BookmarkService`.
+The `BookmarkRepository` provides a robust mechanism for querying bookmarks through a combination of status-based filtering, chronological sorting, and offset-based pagination. This implementation ensures that even as the in-memory dataset grows, the application can efficiently serve specific subsets of data to the frontend or API consumers.
 
-### Fetching Paginated Bookmarks
+## The Query Engine: `list_bookmarks`
 
-Use the `list_bookmarks` method to retrieve a slice of bookmarks. This method handles both pagination and status filtering, returning a tuple containing the list of items and the total count of matching records.
+The primary entry point for retrieving multiple bookmarks is the `list_bookmarks` method in `app.db.repository.BookmarkRepository`. Unlike simple list accessors, this method performs three distinct operations on the internal `_bookmarks` dictionary:
+
+1.  **Filtering**: Narrowing the dataset based on the bookmark's lifecycle state.
+2.  **Sorting**: Ordering the results by creation time.
+3.  **Pagination**: Slicing the ordered list into manageable chunks.
 
 ```python
-from app.db.repository import BookmarkRepository
-
-repo = BookmarkRepository()
-
-# Fetch the first page of active bookmarks (25 per page)
-bookmarks, total = repo.list_bookmarks(
-    page=1, 
-    per_page=25, 
-    status="active"
-)
-
-print(f"Showing {len(bookmarks)} of {total} total active bookmarks.")
+def list_bookmarks(
+    self,
+    page: int = 1,
+    per_page: int = 25,
+    status: Optional[str] = None,
+) -> Tuple[List[Bookmark], int]:
+    # 1. Convert dictionary values to a list for processing
+    items = list(self._bookmarks.values())
+    
+    # 2. Apply Status Filtering
+    if status:
+        try:
+            target = BookmarkStatus(status)
+            items = [b for b in items if b.status == target]
+        except ValueError:
+            # If status is invalid, the filter is ignored
+            pass
+            
+    # 3. Apply Sorting (Hardcoded to created_at DESC)
+    items.sort(key=lambda b: b.created_at, reverse=True)
+    
+    # 4. Calculate Pagination
+    total = len(items)
+    start = (page - 1) * per_page
+    return items[start : start + per_page], total
 ```
 
-### Filtering by Status
+## Status-Based Filtering
 
-The `status` parameter in `list_bookmarks` accepts strings that correspond to the `BookmarkStatus` enum values: `active`, `archived`, or `trashed`.
+Filtering is driven by the `BookmarkStatus` enumeration found in `app.models.bookmark`. The repository maps string inputs to these enum members to ensure type safety during the filtering process.
 
-*   **Active**: Default status for new bookmarks.
-*   **Archived**: Bookmarks moved out of the main list but not deleted.
-*   **Trashed**: Soft-deleted bookmarks.
+### Supported Statuses
+The system recognizes three specific states defined in `BookmarkStatus`:
+- `active`: The default state for new bookmarks.
+- `archived`: Bookmarks moved out of the main view but preserved.
+- `trashed`: Bookmarks marked for deletion (soft-delete).
 
-If an invalid status string is provided, the repository catches the `ValueError` and returns results without applying a status filter.
+The repository handles invalid status strings gracefully. If a string is provided that does not match a value in `BookmarkStatus`, the `ValueError` is caught, and the repository returns the full list (unfiltered) rather than raising an error.
 
-```python
-# Fetch archived bookmarks
-archived_items, count = repo.list_bookmarks(status="archived")
+## Pagination Logic
 
-# Fetch trashed bookmarks
-trashed_items, count = repo.list_bookmarks(status="trashed")
-```
+The repository implements **1-based offset pagination**. This means the first page is requested as `page=1`, not `page=0`.
 
-### Filtering by Tags
+### Offset Calculation
+The starting index for the list slice is calculated as:
+`start = (page - 1) * per_page`
 
-To find all bookmarks associated with a specific tag, use the `get_bookmarks_with_tag` method. Unlike `list_bookmarks`, this method returns a simple list of all matching bookmarks without built-in pagination.
+The method returns a `Tuple[List[Bookmark], int]`, where the second element is the **total count of matching items** before pagination was applied. This is critical for frontend components to calculate the total number of available pages.
 
-```python
-# Get all bookmarks tagged with 'python-docs'
-tag_id = "python-docs"
-tagged_bookmarks = repo.get_bookmarks_with_tag(tag_id)
+### Default Constraints
+While the repository itself does not enforce a maximum `per_page` limit, the API layer in `app/routes/bookmarks.py` typically defaults to 25 items per page.
 
-for b in tagged_bookmarks:
-    print(f"Found: {b.title} ({b.url})")
-```
+## Chronological Sorting
 
-This pattern is used internally by `BookmarkService.delete_tag` to clean up references when a tag is removed:
+The repository enforces a strict sorting policy: bookmarks are always returned in **descending order of creation** (`created_at`). This ensures that the most recently added bookmarks appear first in the results. This sorting is applied *after* filtering but *before* pagination slicing to ensure consistency across page boundaries.
 
-```python
-# Example from app/services/bookmark_service.py
-def delete_tag(self, tag_id: str) -> bool:
-    # ...
-    for bookmark in self._repo.get_bookmarks_with_tag(tag_id):
-        bookmark.remove_tag(tag_id)
-        self._repo.save_bookmark(bookmark)
-    # ...
-```
+## Integration Flow
 
-### API Integration Example
+The filtering and pagination parameters typically originate from the REST API and flow through the service layer to the repository.
 
-In a Flask route, you can expose these features by passing query parameters from the request to the `BookmarkService`.
+### API Route Example
+In `app/routes/bookmarks.py`, query parameters are extracted and passed to the `BookmarkService`:
 
 ```python
-from flask import request, jsonify
-from app.services.bookmark_service import BookmarkService
-
-_service = BookmarkService()
-
 @bookmarks_bp.route("/", methods=["GET"])
 def list_bookmarks():
-    # Extract parameters with defaults
+    # Extract parameters from URL query string
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 25, type=int)
     status = request.args.get("status", None)
-
-    # Delegate to service (which calls repository)
+    
+    # Delegate to service, which calls the repository
     bookmarks, total = _service.list_bookmarks(
         page=page, 
         per_page=per_page, 
         status=status
     )
-
+    
     return jsonify({
         "bookmarks": [b.to_dict() for b in bookmarks], 
         "total": total
     })
 ```
 
-### Troubleshooting and Implementation Details
-
-*   **1-Based Indexing**: The `page` parameter is 1-indexed. Requesting `page=1` returns the first set of results.
-*   **Hardcoded Sorting**: Results in `list_bookmarks` are always sorted by `created_at` in descending order (newest first).
-*   **In-Memory Storage**: The `BookmarkRepository` stores data in-memory. All filters and pagination are performed on Python lists (`self._bookmarks.values()`). Data is lost when the application restarts.
-*   **Tag Filter Performance**: `get_bookmarks_with_tag` performs a linear scan of all bookmarks in memory. While efficient for small datasets, performance may degrade if the number of bookmarks grows significantly.
-*   **Invalid Status**: If you pass a status that does not exist in `BookmarkStatus`, the filter is silently ignored, and you will receive bookmarks of all statuses.
+### Service Layer Role
+The `BookmarkService` in `app/services/bookmark_service.py` acts as a facade. While it currently passes these parameters directly to the `BookmarkRepository`, it provides the hook point for adding caching or cross-cutting concerns to paginated queries. For example, while individual bookmarks are cached in an `LRUCache`, the `list_bookmarks` operation always queries the repository directly to ensure the most up-to-date filtered results.

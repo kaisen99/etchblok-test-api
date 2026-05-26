@@ -8,7 +8,7 @@ Create a new collection.
     Expects JSON with ``name`` (required) and optional ``type`` (manual|smart)
     and ``filter_rule``.
 
-Creates a new collection for organizing bookmarks, supporting both manual and smart collection types.
+Creates a new collection for organizing items, supporting both manual and smart collection types with optional filtering rules.
 
 ## Endpoint
 
@@ -20,13 +20,13 @@ POST /api/collections/
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **name** | `string` | The display name of the collection to be created. |
-| **type** | `string` | The classification of the collection, such as 'manual' for user-curated lists or 'smart' for automated filtering. |
-| **filter_rule** | `string` | The logic or criteria used to automatically populate bookmarks if the collection type is set to 'smart'. |
+| **name** | `string` | The required display name for the new collection. |
+| **type** | `string` | The classification of the collection, such as 'manual' or 'smart'. |
+| **filter_rule** | `string` | The logic or criteria used to automatically populate items in a smart collection. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **201** | The collection was successfully created. Returns `object`. |
-| **400** | The request was invalid, typically due to missing required fields or validation errors in the service layer. Returns `object`. |
+| **400** | The request was invalid or the collection could not be created due to provided data errors. Returns `object`. |

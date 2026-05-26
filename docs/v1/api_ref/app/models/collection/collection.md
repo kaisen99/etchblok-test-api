@@ -38,7 +38,7 @@ Number of bookmarks in the collection.
 
 | Type | Description |
 |------|-------------|
-| `int` | The total count of bookmark IDs currently stored in the collection |
+| `int` | The total count of bookmark identifiers currently stored in the collection. |
 
 ---
 
@@ -55,7 +55,7 @@ Whether this collection auto-populates based on a filter rule.
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the collection type is SMART, False otherwise |
+| `bool` | True if the collection type is SMART, False if it is MANUAL. |
 
 ---
 
@@ -99,13 +99,13 @@ Remove a bookmark from the collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be removed |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be removed from the collection. |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the bookmark was successfully removed, False if the ID was not found |
+| `bool` | True if the bookmark was successfully found and removed, False otherwise. |
 
 ---
 
@@ -115,7 +115,7 @@ Remove a bookmark from the collection.
 @classmethod
 def reorder(
     bookmark_ids: List[str]
-) - > null
+) - > None
 ```
 
 Replace the bookmark ordering.
@@ -130,7 +130,7 @@ Replace the bookmark ordering.
 
 | Type | Description |
 |------|-------------|
-| `null` |  |
+| `None` |  |
 
 ---
 
@@ -138,7 +138,7 @@ Replace the bookmark ordering.
 
 ```python
 @classmethod
-def pin() - > null
+def pin() - > None
 ```
 
 Pin the collection to the top of the sidebar.
@@ -147,7 +147,7 @@ Pin the collection to the top of the sidebar.
 
 | Type | Description |
 |------|-------------|
-| `null` |  |
+| `None` |  |
 
 ---
 
@@ -155,7 +155,7 @@ Pin the collection to the top of the sidebar.
 
 ```python
 @classmethod
-def unpin() - > null
+def unpin() - > None
 ```
 
 Unpin the collection.
@@ -164,7 +164,7 @@ Unpin the collection.
 
 | Type | Description |
 |------|-------------|
-| `null` |  |
+| `None` |  |
 
 ---
 
@@ -181,7 +181,7 @@ Serialise to JSON-safe dictionary.
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary containing the collection's metadata, IDs, and state |
+| `Dict[str, Any]` | A dictionary containing the collection's metadata, including ID, name, type, and bookmark list. |
 
 ---
 
@@ -200,12 +200,12 @@ Construct from a dictionary.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **data** | `Dict[str, Any]` | A dictionary containing collection attributes like name and type |
+| **data** | `Dict[str, Any]` | A dictionary containing collection attributes such as name, type, and filter_rule. |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `[Collection](collection.md?sid=app_models_collection_collection)` | A new instance of the Collection class populated with the provided data |
+| `[Collection](collection.md?sid=app_models_collection_collection)` | A new instance of the Collection class populated with the provided data. |
 
 ---

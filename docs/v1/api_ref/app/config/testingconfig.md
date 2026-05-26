@@ -9,8 +9,8 @@ Configuration for test runs.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **TESTING** | `bool` = True | Flag indicating whether the application is running in a test environment, typically used to enable test-specific behavior or mock services. |
-| **PAGE_SIZE** | `int` = 5 | The number of items to return per page in paginated responses during testing. |
+| **TESTING** | `bool` = True | Flag indicating that the application is running in a test environment, typically used to disable error catching or enable mock services. |
+| **PAGE_SIZE** | `int` = 5 | The number of items to return per page in paginated test results. |
 
 ---
 

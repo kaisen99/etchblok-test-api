@@ -28,7 +28,7 @@ def Tag(
     description: str = "",
     id: str = uuid.uuid4().hex[:8],
     usage_count: int = 0
-)
+) - > None
 ```
 
 ### Parameters
@@ -64,7 +64,7 @@ Rename the tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **new_name** | `str` | The new display name for the tag, which must be non-empty and under 50 characters. |
+| **new_name** | `str` | The new display name. |
 
 #### Returns
 
@@ -87,7 +87,7 @@ Record that a bookmark now uses this tag. Returns new count.
 
 | Type | Description |
 |------|-------------|
-| `int` | The updated total number of bookmarks associated with this tag. |
+| `int` | The updated usage count after incrementing. |
 
 ---
 
@@ -104,7 +104,7 @@ Record that a bookmark removed this tag. Returns new count.
 
 | Type | Description |
 |------|-------------|
-| `int` | The updated total number of bookmarks associated with this tag, clamped to a minimum of zero. |
+| `int` | The updated usage count after decrementing, ensuring it does not fall below zero. |
 
 ---
 
@@ -121,7 +121,7 @@ Serialise to a JSON-safe dictionary.
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary containing the tag's ID, name, color value, description, and usage count. |
+| `Dict[str, Any]` | A dictionary representation of the tag's attributes including id, name, color, description, and usage count. |
 
 ---
 
@@ -140,12 +140,12 @@ Construct a Tag from a dictionary.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **data** | `Dict[str, Any]` | A dictionary containing tag attributes such as name, color, and description. |
+| **data** | `Dict[str, Any]` | The dictionary containing tag attributes like name, color, and description. |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `[Tag](tag.md?sid=app_models_tag_tag)` | A new Tag instance initialized with the provided dictionary data. |
+| `[Tag](tag.md?sid=app_models_tag_tag)` | A new Tag instance populated with data from the provided dictionary. |
 
 ---

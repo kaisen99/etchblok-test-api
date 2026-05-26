@@ -10,7 +10,7 @@ Configuration for local development.
 | Attribute | Type | Description |
 |----------|------|-------------|
 | **DEBUG** | `bool` = True | Enables or disables the debug mode for the application to provide detailed error messages during local development. |
-| **PAGE_SIZE** | `int` = 10 | Defines the standard number of items to be returned per page in paginated API responses or views. |
+| **PAGE_SIZE** | `int` = 10 | Specifies the number of items to be displayed per page in paginated responses. |
 
 ---
 
@@ -33,6 +33,6 @@ Generates the cache configuration settings specifically for the local developmen
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary containing the Time-To-Live (TTL) and maximum size constraints for the development cache. |
+| `Dict[str, Any]` | A dictionary containing the time-to-live (TTL) and maximum size constraints for the development cache. |
 
 ---

@@ -1,44 +1,57 @@
 ---
-{title: Bookmark Entity Lifecycle, description: The state machine for the entity is managed through the BookmarkStatus enum. It follows a simple lifecycle where bookmarks are created in an Active state and..., displayed_sidebar: architectureSidebar, section_type: architecture}
+{title: Bookmark Entity Lifecycle, description: The state diagram illustrates the lifecycle of a entity within the system. A bookmark begins its lifecycle in the Active state upon creation via the..., displayed_sidebar: architectureSidebar, section_type: architecture}
 ---
 # Bookmark Entity Lifecycle
 
-The state machine for the [Bookmark](/api_ref/app/models/bookmark/bookmark) entity is managed through the `BookmarkStatus` enum. It follows a simple lifecycle where bookmarks are created in an **Active** state and can be moved to **Archived** or **Trashed** (soft-deleted) states. 
+The state diagram illustrates the lifecycle of a [Bookmark](/api_ref/app/models/bookmark/bookmark) entity within the system. 
 
-The system uses a layered approach where the [BookmarkService](/api_ref/app/services/bookmark/service/bookmarkservice) orchestrates these transitions by calling domain methods on the `Bookmark` model and then persisting the changes via the [BookmarkRepository](/api_ref/app/db/repository/bookmarkrepository). 
+A bookmark begins its lifecycle in the **Active** state upon creation via the `create_bookmark` service method. From there, it can transition between three primary states: **Active**, **Archived**, and **Trashed**.
 
-Key characteristics of this lifecycle include:
-- **Soft Deletion**: The `delete_bookmark` operation does not remove the record from the database but instead transitions it to the `TRASHED` state.
-- **Bidirectional Transitions**: The model allows moving between any of the three states (Active, Archived, Trashed) without restrictive guard conditions, provided the bookmark exists.
-- **Persistence**: Every state transition triggers a `_touch()` call to update the `updated_at` timestamp and is immediately saved to the repository.
+- **Active**: The default state where the bookmark is fully visible and searchable.
+- **Archived**: A state for bookmarks that are no longer active but kept for reference. This is triggered by the `archive_bookmark` method.
+- **Trashed**: A soft-deleted state. Bookmarks are moved here via the `delete_bookmark` method instead of being immediately removed from the database.
+
+Key characteristics of these transitions include:
+- **Restoration**: Bookmarks in either the **Archived** or **Trashed** states can be returned to the **Active** state using the `restore_bookmark` method.
+- **Inter-state movement**: The system allows moving a bookmark directly from **Trashed** to **Archived** and vice versa, providing flexibility in how users manage their saved content.
+- **Metadata Updates**: The `update_bookmark` method allows modifying fields like title and URL without changing the bookmark's status. Every state transition (including updates) triggers an internal `_touch()` call that refreshes the `updated_at` timestamp.
+- **Persistence**: All state changes are persisted via the `BookmarkRepository`, and the internal cache is invalidated to ensure consistency across the service.
 
 **Key Architectural Findings:**
-- Bookmarks have three primary states: ACTIVE, ARCHIVED, and TRASHED, defined in the BookmarkStatus enum.
-- The initial state for any new bookmark is ACTIVE, set during instantiation in the Bookmark dataclass.
-- Transitions are triggered by specific API endpoints: DELETE /\<id> (trash), POST /\<id>/archive, and POST /\<id>/restore.
-- The delete_bookmark service method implements a 'soft-delete' pattern by moving the entity to the TRASHED state rather than removing it.
-- The domain model (Bookmark class) provides explicit methods (archive, trash, restore) to handle these state changes and update the modification timestamp.
+- The Bookmark entity uses a BookmarkStatus enum with three values: ACTIVE, ARCHIVED, and TRASHED.
+- The delete_bookmark service method performs a soft-delete by transitioning the bookmark to the TRASHED state rather than removing it from the repository.
+- The restore_bookmark method is a unified way to move bookmarks from both ARCHIVED and TRASHED states back to ACTIVE.
+- Every state transition calls a private _touch() method to update the modification timestamp (updated_at).
+- The repository contains a hard-delete method (delete_bookmark), but it is not currently exposed through the BookmarkService or the REST API.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Active: "create_bookmark (POST /)"
-    
-    Active --> Archived: "archive_bookmark (POST /archive)"
-    Active --> Trashed: "delete_bookmark (DELETE /)"
-    
-    Archived --> Active: "restore_bookmark (POST /restore)"
-    Archived --> Trashed: "delete_bookmark (DELETE /)"
-    
-    Trashed --> Active: "restore_bookmark (POST /restore)"
-    Trashed --> Archived: "archive_bookmark (POST /archive)"
+    [*] --> Active: "create_bookmark()"
+
+    Active --> Archived: "archive_bookmark()"
+    Active --> Trashed: "delete_bookmark()"
+    Active --> Active: "update_bookmark()"
+
+    Archived --> Active: "restore_bookmark()"
+    Archived --> Trashed: "delete_bookmark()"
+    Archived --> Archived: "update_bookmark()"
+
+    Trashed --> Active: "restore_bookmark()"
+    Trashed --> Archived: "archive_bookmark()"
+    Trashed --> Trashed: "update_bookmark()"
 
     note right of Active
-        Default state for 
-        newly created bookmarks
+        Initial state.
+        Visible in main listings.
     end note
 
     note right of Trashed
-        Soft-deleted state; 
-        can be restored or archived
+        Soft-deleted state.
+        Can be restored or archived.
+    end note
+
+    note left of Archived
+        Reference state.
+        Hidden from main listings.
     end note
 ```

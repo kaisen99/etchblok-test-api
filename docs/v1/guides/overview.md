@@ -1,104 +1,111 @@
 ---
 section_type: guide
 ---
-Pagemark API is a lightweight, Flask-based REST service for managing bookmarks. It provides a structured way to save URLs, organize them with tags and collections, and perform full-text searches across your saved content.
+Pagemark API is a lightweight, developer-friendly REST service for managing bookmarks. It provides a structured way to save URLs, organize them with tags and collections, and find them instantly using a built-in full-text search engine.
 
-## The Digital Hoarding Solution
-Pagemark solves the "scattered tab" problem by providing a centralized repository for web resources. Instead of losing links in browser history or disparate note-taking apps, Pagemark offers a searchable, taggable, and programmable API to manage your digital library.
+## Centralized Bookmark Management
+
+Managing bookmarks across different browsers and devices often leads to fragmented, unsearchable lists. Pagemark API centralizes bookmark storage into a single, programmable interface. It solves the "where did I save that?" problem by providing a robust search index and flexible organization through tags and collections, making it ideal for building personal bookmarking tools, browser extensions, or knowledge management systems.
 
 ## Core Concepts
 
-*   **Bookmarks**: The primary entity. Each bookmark contains a URL, title, description, and a lifecycle status (Active, Archived, or Trashed).
-*   **Tags**: Flexible, color-coded labels (e.g., "Research", "To-Read") that can be applied across bookmarks for cross-cutting organization.
-*   **Collections**: Named groups of bookmarks. These can be **Manual** (explicitly added) or **Smart** (automatically populated based on filter rules).
-*   **Status Lifecycle**: A built-in workflow for moving bookmarks from active use to a long-term archive or a temporary trash bin for soft-deletion.
+- **Bookmarks**: The primary entity, representing a saved URL with a title, description, and metadata.
+- **Tags**: Flexible, color-coded labels that can be attached to multiple bookmarks for cross-cutting organization.
+- **Collections**: Named groups used to categorize bookmarks into specific projects or topics (e.g., "Recipes", "Work", "Reading List").
+- **Status Lifecycle**: Bookmarks move through `active`, `archived`, and `trashed` states, allowing for soft-deletion and long-term storage without cluttering the main view.
+- **Search Index**: An inverted index that automatically indexes titles and descriptions for fast, keyword-based retrieval.
 
-## How it Works
-The application follows a clean, layered architecture designed for testability and separation of concerns:
+## How It Works
 
-1.  **Routes**: Flask blueprints (e.g., `bookmarks_bp`) handle HTTP request parsing and response formatting.
-2.  **Service Layer**: The `BookmarkService` (a singleton) orchestrates business logic, including validation, cache management, and search indexing.
-3.  **Repository**: The `BookmarkRepository` abstracts data access. In the current version, this is an **in-memory** store using Python dictionaries.
-4.  **Search & Cache**: A dedicated `SearchIndex` provides full-text search capabilities, while an `LRUCache` ensures frequently accessed bookmarks are retrieved instantly.
+The application follows a layered architecture designed for clarity and extensibility:
+
+1.  **Request Handling**: Flask blueprints in `app.routes` receive HTTP requests and parse incoming JSON or query parameters.
+2.  **Service Orchestration**: The `BookmarkService` (a singleton facade) validates data and coordinates actions between the repository, search index, and cache.
+3.  **In-Memory Storage**: The `BookmarkRepository` manages the lifecycle of entities in memory, providing a clean abstraction for future database integrations.
+4.  **Full-Text Search**: As bookmarks are created or updated, the `SearchIndex` tokenizes their content and updates an inverted index for instant lookups.
+5.  **LRU Caching**: Frequently accessed bookmarks are stored in an `LRUCache` to minimize repository lookups and improve response times.
 
 ## Use Cases
 
-### Create a Bookmark
-Save a new URL with a title and description.
+### Creating a Bookmark
 ```python
-# POST /api/bookmarks/
-{
-    "url": "https://flask.palletsprojects.com/",
-    "title": "Flask Documentation",
-    "description": "The official documentation for the Flask web framework."
-}
+from app.services.bookmark_service import BookmarkService
+
+service = BookmarkService()
+bookmark, error = service.create_bookmark({
+    "url": "https://github.com",
+    "title": "GitHub",
+    "description": "Where the world builds software"
+})
 ```
 
-### Organize with Tags
-Create a tag and attach it to a bookmark to group related content.
+### Searching Bookmarks
 ```python
-# POST /api/tags/
-{
-    "name": "Python",
-    "color": "blue"
-}
+from app.services.bookmark_service import BookmarkService
 
-# PUT /api/bookmarks/<id>
-{
-    "tags": ["python-tag-id"]
-}
+service = BookmarkService()
+# Search across titles and descriptions
+results = service.full_text_search("software", limit=5)
+for b in results:
+    print(f"Found: {b.title} ({b.url})")
 ```
 
-### Full-Text Search
-Search across all your saved titles and descriptions.
-```bash
-# GET /api/bookmarks/search?q=flask
-{
-    "results": [...],
-    "count": 1
-}
-```
-
-### Smart Collections
-Create a collection that automatically includes bookmarks matching a specific keyword.
+### Organizing with Tags
 ```python
-# POST /api/collections/
-{
-    "name": "Frameworks",
-    "type": "smart",
-    "filter_rule": "framework"
-}
+from app.services.bookmark_service import BookmarkService
+
+service = BookmarkService()
+
+# Create a color-coded tag
+tag, _ = service.create_tag({"name": "development", "color": "blue"})
+
+# Update bookmark with the new tag ID
+service.update_bookmark(bookmark_id="abc123", data={"tags": [tag.id]})
 ```
 
 ## When to Use
-*   **Personal Tools**: Building a private bookmarking dashboard or browser extension.
-*   **Prototyping**: Quickly testing bookmark-related features without setting up a heavy database.
-*   **Learning**: Exploring a well-structured Flask application with a service-repository pattern.
 
-## When Not to Use
-*   **Persistent Storage**: Since the repository is in-memory, all data is lost when the server restarts. It is not suitable for long-term data retention without implementing a database-backed repository.
-*   **High Concurrency**: The in-memory storage and singleton service pattern are not designed for high-traffic production environments.
+- **Use when**:
+    - Building a personal bookmarking tool or browser extension.
+    - You need a simple, self-contained API for URL management.
+    - You want a lightweight service with built-in search and caching.
+- **Don't use when**:
+    - You require persistent storage across restarts (current implementation is in-memory).
+    - You need multi-user authentication and authorization.
+    - You are managing millions of bookmarks (the in-memory index is optimized for small to medium datasets).
 
-## Integration & Stack
-*   **Framework**: Flask 3.0+
-*   **Language**: Python 3.x
-*   **Dependencies**: `python-dotenv` for configuration management.
-*   **Storage**: In-memory (pluggable repository pattern).
+## Stack Compatibility
+
+- **Language**: Python 3.x
+- **Framework**: Flask 3.0+
+- **Dependencies**: `python-dotenv` for configuration.
+- **Storage**: In-memory (pluggable repository pattern).
 
 ## Getting Started Pointers
-*   Explore the [Bookmark Model](/api_ref/app/models/bookmark/bookmark) to see available metadata fields.
-*   Check the [BookmarkService](/api_ref/app/services/bookmark/service/bookmarkservice) for the core business logic implementation.
-*   Review the [API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture) in the README for a full list of available routes.
+
+- **API Endpoints**: See the full list of available REST endpoints in the `README.md`.
+- **Bookmark Model**: Explore the `app.models.bookmark.Bookmark` dataclass and its attributes.
+- **BookmarkService**: The `app.services.bookmark_service.BookmarkService` is the main entry point for all business logic.
+
+## Limitations & Assumptions
+
+- **Volatility**: All data is lost when the server restarts as it uses in-memory storage.
+- **Single User**: The API does not currently support multiple user accounts or permissions.
+- **Validation**: Basic URL and title validation is performed, but it does not check if the URL is reachable.
 
 ## FAQ
-**Does it support persistent storage?**
-Not out-of-the-box. The current `BookmarkRepository` is in-memory. However, the architecture is designed to allow swapping it with a SQL or NoSQL implementation.
 
-**How does the search work?**
-It uses a `SearchIndex` class that performs keyword matching across the `title` and `description` fields of all indexed bookmarks.
+**How do I persist data?**
+Currently, the API uses an in-memory repository. To persist data, you would need to implement a new `BookmarkRepository` in `app.db.repository` that interfaces with a database like SQLite or PostgreSQL.
 
-**What is a "Smart" collection?**
-A smart collection uses a `filter_rule` (a simple keyword) to automatically group bookmarks. Any bookmark containing that keyword in its title or description is considered part of the collection.
+**Is the search case-sensitive?**
+No, the `SearchIndex` tokenizes and searches text in a case-insensitive manner.
 
-**Can I recover deleted bookmarks?**
-Yes. The `DELETE` endpoint performs a "soft-delete" by moving the bookmark to the `TRASHED` status. You can restore it using the `/restore` endpoint.
+**What happens when I delete a tag?**
+When a tag is deleted via `BookmarkService.delete_tag`, it is automatically stripped from all bookmarks that were using it before the tag itself is removed.
+
+**Can a bookmark belong to multiple collections?**
+Yes. You can add a bookmark to multiple collections by calling `add_to_collection` for each target collection.
+
+**How does the cache work?**
+It uses a Least-Recently-Used (LRU) strategy with a default size of 256 items. It is automatically invalidated whenever a bookmark is updated or deleted to ensure data consistency.

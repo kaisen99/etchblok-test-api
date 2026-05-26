@@ -10,7 +10,7 @@ Inverted index mapping tokens to bookmark IDs.
 | Attribute | Type | Description |
 |----------|------|-------------|
 | **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository used to retrieve full bookmark objects during search and initial index building. |
-| **_index** | `Dict[str, Set[str]]` = defaultdict(set) | Inverted index mapping tokens to bookmark IDs, used to perform fast lookups of bookmarks containing specific search terms. |
+| **_index** | `Dict[str, Set[str]]` = defaultdict(set) | An inverted index mapping search tokens to sets of bookmark IDs for efficient lookup during query execution. |
 
 ---
 
@@ -32,6 +32,22 @@ def SearchIndex(
 
 ---
 
+### Signature
+
+```python
+def SearchIndex(
+    repository: [BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)
+) - > None
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data for indexing and retrieval. |
+
+---
+
 
 
 ## Methods
@@ -44,7 +60,7 @@ def SearchIndex(
 @classmethod
 def index_bookmark(
     bookmark: [Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)
-)
+) - > None
 ```
 
 Add or update a bookmark in the index.
@@ -53,7 +69,13 @@ Add or update a bookmark in the index.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark** | `[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)` | The bookmark object containing the title and description to be indexed. |
+| **bookmark** | `[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)` | The bookmark object containing the title and description to be tokenized and indexed. |
+
+#### Returns
+
+| Type | Description |
+|------|-------------|
+| `None` |  |
 
 ---
 
@@ -63,7 +85,7 @@ Add or update a bookmark in the index.
 @classmethod
 def remove_bookmark(
     bookmark_id: str
-)
+) - > None
 ```
 
 Remove a bookmark from the index.
@@ -72,7 +94,13 @@ Remove a bookmark from the index.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be removed from the search index. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be purged from the inverted index. |
+
+#### Returns
+
+| Type | Description |
+|------|-------------|
+| `None` |  |
 
 ---
 
@@ -92,8 +120,8 @@ Search bookmarks matching the query string. Tokens are AND-ed together — all m
 
 | Name | Type | Description |
 |------|------|-------------|
-| **query** | `str` | Free-text search query used to filter bookmarks. |
-| **limit** | `int` = 20 | Maximum number of results to return from the search. |
+| **query** | `str` | Free-text search query containing the terms to match against indexed bookmarks. |
+| **limit** | `int` = 20 | Maximum number of results to return from the ranked search results. |
 
 #### Returns
 
