@@ -5,7 +5,7 @@
 
 Archive a bookmark.
 
-Archives an existing bookmark by its unique identifier to hide it from the primary list.
+Archives an existing bookmark by its unique identifier to hide it from the primary list without permanent deletion.
 
 ## Endpoint
 
@@ -24,4 +24,4 @@ POST /api/bookmarks/< bookmark_id >/archive
 | Status | Description |
 |--------|-------------|
 | **200** | The bookmark was successfully archived. Returns `object`. |
-| **404** | The bookmark with the specified ID could not be found. Returns `object`. |
+| **404** | The specified bookmark ID does not exist in the system. Returns `object`. |

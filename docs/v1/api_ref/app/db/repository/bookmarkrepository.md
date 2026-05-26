@@ -9,9 +9,9 @@ In-memory storage for bookmarks, tags, and collections.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal dictionary mapping unique bookmark IDs to Bookmark objects for in-memory storage and retrieval. |
-| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal dictionary mapping unique tag IDs to Tag objects used to manage bookmark categorization. |
-| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal dictionary mapping unique collection IDs to Collection objects for organizing bookmarks into groups. |
+| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | A dictionary mapping unique bookmark IDs to Bookmark objects for in-memory persistence and retrieval. |
+| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | A dictionary mapping unique tag IDs to Tag objects used to manage and organize bookmark metadata. |
+| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | A dictionary mapping unique collection IDs to Collection objects for grouping related bookmarks together. |
 
 ---
 
@@ -60,7 +60,7 @@ Insert or update a bookmark.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -85,7 +85,7 @@ Retrieve a bookmark by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The Bookmark object if found, otherwise None |
+| `Optional[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The Bookmark object matching the ID, or None if no such bookmark exists |
 
 ---
 
@@ -104,7 +104,7 @@ Hard-delete a bookmark. Returns True if it existed.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be permanently removed |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be deleted |
 
 #### Returns
 
@@ -131,15 +131,15 @@ Return a paginated slice of bookmarks.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **page** | `int` = 1 | The 1-based page index for pagination |
-| **per_page** | `int` = 25 | The maximum number of bookmark items to return per page |
-| **status** | `Optional[str]` = None | An optional filter string to restrict results by status, such as 'active', 'archived', or 'trashed' |
+| **page** | `int` = 1 | 1-based page index for pagination |
+| **per_page** | `int` = 25 | The maximum number of items to return per page |
+| **status** | `Optional[str]` = None | Optional status filter string (active, archived, trashed) to narrow down results |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], int]` | A tuple containing the list of bookmarks for the current page and the total count of matching bookmarks |
+| `Tuple[List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], int]` | A tuple containing the list of bookmarks for the current page and the total count of bookmarks matching the filter |
 
 ---
 
@@ -189,7 +189,7 @@ Insert or update a tag.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -214,7 +214,7 @@ Retrieve a tag by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | The Tag object if found, otherwise None |
+| `Optional[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | The Tag object matching the ID, or None if no such tag exists |
 
 ---
 
@@ -233,7 +233,7 @@ Hard-delete a tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to be permanently removed |
+| **tag_id** | `str` | The unique identifier of the tag to be deleted |
 
 #### Returns
 
@@ -256,7 +256,7 @@ Return all tags.
 
 | Type | Description |
 |------|-------------|
-| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all Tag objects stored in the repository |
+| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list containing all Tag objects stored in the repository |
 
 ---
 
@@ -281,7 +281,7 @@ Insert or update a collection.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -306,7 +306,7 @@ Retrieve a collection by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | The Collection object if found, otherwise None |
+| `Optional[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | The Collection object matching the ID, or None if no such collection exists |
 
 ---
 
@@ -325,7 +325,7 @@ Hard-delete a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the collection to be permanently removed |
+| **collection_id** | `str` | The unique identifier of the collection to be deleted |
 
 #### Returns
 
@@ -348,6 +348,6 @@ Return all collections.
 
 | Type | Description |
 |------|-------------|
-| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all Collection objects stored in the repository |
+| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list containing all Collection objects stored in the repository |
 
 ---

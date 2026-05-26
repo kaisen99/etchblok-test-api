@@ -9,8 +9,8 @@ Inverted index mapping tokens to bookmark IDs.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository used to retrieve full bookmark objects during search and initial index building. |
-| **_index** | `Dict[str, Set[str]]` = defaultdict(set) | An inverted index mapping search tokens to sets of bookmark IDs for efficient lookup during query execution. |
+| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data during index rebuilding and search result retrieval. |
+| **_index** | `Dict[str, Set[str]]` | Inverted index mapping tokens to bookmark IDs, used to perform efficient lookups during search operations. |
 
 ---
 
@@ -28,7 +28,7 @@ def SearchIndex(
 
 | Name | Type | Description |
 |------|------|-------------|
-| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository to index from. |
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to populate and update the search index. |
 
 ---
 
@@ -44,7 +44,7 @@ def SearchIndex(
 
 | Name | Type | Description |
 |------|------|-------------|
-| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data for indexing and retrieval. |
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data for indexing. |
 
 ---
 

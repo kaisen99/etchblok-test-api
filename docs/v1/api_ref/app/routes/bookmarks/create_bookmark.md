@@ -19,12 +19,12 @@ POST /api/bookmarks/
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **url** | `string` | The full web address to be saved as a bookmark. |
-| **title** | `string` | A user-defined label or name for the bookmark. |
+| **url** | `string` | The destination URL address for the bookmark. |
+| **title** | `string` | A user-defined title or label for the bookmark. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **201** | The bookmark was successfully created. Returns `object`. |
-| **400** | The request was invalid, typically due to missing required fields or validation errors. Returns `object`. |
+| **400** | The request was invalid or the bookmark could not be created due to a service error. Returns `object`. |

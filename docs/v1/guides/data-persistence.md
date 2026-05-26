@@ -1,23 +1,21 @@
 ---
 title: Data Persistence
-description: In-memory storage and repository patterns for managing the lifecycle of application entities.
+description: In-memory storage and repository patterns for managing entity lifecycles.
 code_symbols: [SYM#09a56e7acb86a9afef18a62134c27802cd473050]
-section_id: 80cc4bd3-0eb4-4d14-82d9-8042416b2fb7_data_persistence
-doc_type: guide
+section_id: d31dfeb9-376c-4541-b490-51147aaf5703_data_persistence
+doc_type: explanation
 section_type: guide
 ---
-Data persistence in this application is implemented using an in-memory repository pattern, orchestrated by a central service layer that manages caching and full-text indexing. While the current implementation stores data in volatile memory, the architecture is designed to be easily swapped for a persistent database like SQLite or PostgreSQL.
+Data persistence in this project is implemented using an in-memory repository pattern, providing a clean abstraction that decouples the core business logic from the underlying storage mechanism. While the current implementation is volatile, the architecture is designed to transition to a persistent database with minimal changes to the service layer.
 
 ## The Repository Pattern
 
-The `BookmarkRepository` class, located in `app/db/repository.py`, serves as the primary abstraction for data access. It maintains internal dictionaries for the three core entities: `Bookmark`, `Tag`, and `Collection`.
+The `BookmarkRepository` class in `app/db/repository.py` serves as the centralized data access layer. It manages the lifecycle of three primary entities: `Bookmark`, `Tag`, and `Collection`. By encapsulating all storage operations within this class, the rest of the application remains agnostic of whether data is stored in memory or a relational database.
 
-By isolating data access within the repository, the rest of the application remains agnostic to the underlying storage mechanism. The repository provides standard CRUD operations and basic filtering logic.
+The repository uses internal dictionaries to store entities by their unique identifiers:
 
 ```python
 class BookmarkRepository:
-    """In-memory storage for bookmarks, tags, and collections."""
-
     def __init__(self) -> None:
         self._bookmarks: Dict[str, Bookmark] = {}
         self._tags: Dict[str, Tag] = {}
@@ -27,128 +25,106 @@ class BookmarkRepository:
         """Insert or update a bookmark."""
         self._bookmarks[bookmark.id] = bookmark
 
-    def list_bookmarks(
-        self,
-        page: int = 1,
-        per_page: int = 25,
-        status: Optional[str] = None,
-    ) -> Tuple[List[Bookmark], int]:
-        """Return a paginated slice of bookmarks with optional status filtering."""
-        items = list(self._bookmarks.values())
-        if status:
-            try:
-                target = BookmarkStatus(status)
-                items = [b for b in items if b.status == target]
-            except ValueError:
-                pass
-        items.sort(key=lambda b: b.created_at, reverse=True)
-        # ... pagination logic ...
-        return items[start : start + per_page], total
+    def get_bookmark(self, bookmark_id: str) -> Optional[Bookmark]:
+        """Retrieve a bookmark by ID, or None."""
+        return self._bookmarks.get(bookmark_id)
+```
+
+Beyond simple CRUD operations, the repository implements basic filtering and pagination logic. For example, `list_bookmarks` handles status-based filtering and pagination in-memory:
+
+```python
+def list_bookmarks(
+    self,
+    page: int = 1,
+    per_page: int = 25,
+    status: Optional[str] = None,
+) -> Tuple[List[Bookmark], int]:
+    items = list(self._bookmarks.values())
+    if status:
+        try:
+            target = BookmarkStatus(status)
+            items = [b for b in items if b.status == target]
+        except ValueError:
+            pass
+    items.sort(key=lambda b: b.created_at, reverse=True)
+    total = len(items)
+    start = (page - 1) * per_page
+    return items[start : start + per_page], total
+```
+
+## Domain Entities and Serialization
+
+The system relies on three core domain models defined in `app/models/`: `Bookmark`, `Tag`, and `Collection`. These are implemented as Python dataclasses, which simplifies state management and provides built-in support for equality and representation.
+
+To facilitate integration with the Flask API layer and the repository, each model implements `to_dict` and `from_dict` methods. This pattern ensures that serialization logic remains within the domain entity rather than leaking into the service or controller layers.
+
+For instance, the `Bookmark` entity in `app/models/bookmark.py` manages its own state transitions (like archiving or trashing) and serialization:
+
+```python
+@dataclass
+class Bookmark:
+    url: str
+    title: str
+    # ... other fields
+    status: BookmarkStatus = BookmarkStatus.ACTIVE
+
+    def archive(self) -> None:
+        self.status = BookmarkStatus.ARCHIVED
+        self._touch()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "url": self.url,
+            "status": self.status.value,
+            "created_at": self.created_at.isoformat(),
+            # ...
+        }
 ```
 
 ## Service Layer Orchestration
 
-The `BookmarkService` in `app/services/bookmark_service.py` acts as a singleton facade and the primary entry point for business logic. It orchestrates the `BookmarkRepository`, an `LRUCache`, and a `SearchIndex` to ensure data consistency across different subsystems.
+The `BookmarkService` in `app/services/bookmark_service.py` acts as a facade over the repository. It is responsible for orchestrating data persistence with other cross-cutting concerns such as caching and search indexing. 
 
-When a bookmark is created or updated, the service ensures it is persisted in the repository, indexed for search, and that any stale cache entries are invalidated.
+When a bookmark is created or updated, the service ensures it is saved to the repository, added to the `SearchIndex`, and that any relevant entries in the `LRUCache` are invalidated:
 
 ```python
 def create_bookmark(self, data: Dict[str, Any]) -> Tuple[Optional[Bookmark], Optional[str]]:
-    # Validation logic...
+    # ... validation logic ...
     bookmark = Bookmark.from_dict(data)
-    
-    # Orchestration across persistence, search, and cache
     self._repo.save_bookmark(bookmark)
     self._search.index_bookmark(bookmark)
     self._cache.invalidate(bookmark.id)
-    
     return bookmark, None
 ```
 
-### Singleton Lifecycle
-The `BookmarkService` uses a singleton pattern to ensure that the in-memory state is shared across all Flask blueprint modules. It initializes its dependencies via the `_init_services` method:
+This orchestration ensures that the repository remains a "dumb" data store while the service layer manages the complex interactions between different system components.
 
-```python
-def _init_services(self) -> None:
-    """Bootstrap repository, cache, and search index."""
-    self._repo = BookmarkRepository()
-    self._cache: LRUCache[Bookmark] = LRUCache(max_size=256)
-    self._search = SearchIndex(self._repo)
-```
+## Architectural Future-Proofing
 
-## Caching and Search Indexing
-
-To optimize performance and provide advanced querying capabilities, the persistence layer is augmented with specialized in-memory structures.
-
-### LRU Caching
-The `LRUCache` (found in `app/services/_cache.py`) is a generic least-recently-used cache with a fixed capacity (defaulting to 256 entries in the service layer). It uses an `OrderedDict` to track access order, moving items to the end on every `get` or `put` operation.
-
-```python
-def get(self, key: str) -> Optional[T]:
-    if key in self._store:
-        self._store.move_to_end(key)
-        self._stats["hits"] += 1
-        return self._store[key]
-    self._stats["misses"] += 1
-    return None
-```
-
-### Full-Text Search Index
-The `SearchIndex` in `app/services/search_service.py` implements an inverted index mapping tokens to bookmark IDs. On application startup, it rebuilds the entire index by scanning the repository.
-
-```python
-def __init__(self, repository: "BookmarkRepository") -> None:
-    self._repo = repository
-    self._index: Dict[str, Set[str]] = defaultdict(set)
-    self._rebuild()
-
-def _rebuild(self) -> None:
-    """Rebuild the entire index from the repository."""
-    self._index.clear()
-    all_bookmarks, _ = self._repo.list_bookmarks(page=1, per_page=10000)
-    for bookmark in all_bookmarks:
-        self.index_bookmark(bookmark)
-```
-
-## Database Integration Blueprint
-
-While the current repository is in-memory, the codebase includes a `_ConnectionPool` in `app/db/_connection.py` that serves as a blueprint for future database integration. It implements thread-safe connection management with configurable pool sizes.
-
-- **`_POOL_MIN_SIZE`**: 2
-- **`_POOL_MAX_SIZE`**: 20
-
-This internal structure demonstrates how the repository would eventually acquire and release connections to a real database:
+Although the current implementation is in-memory, the codebase includes a thread-safe connection pool stub in `app/db/_connection.py`. This `_ConnectionPool` class demonstrates how the system is prepared for a real database integration. It manages a pool of `_Connection` objects, supporting operations like `acquire`, `release`, and basic transaction management.
 
 ```python
 class _ConnectionPool:
-    """Thread-safe pool of reusable database connections."""
-    
+    def __init__(self, config: Optional[_ConnectionConfig] = None) -> None:
+        self._config = config or _ConnectionConfig()
+        self._available: List[_Connection] = []
+        self._in_use: List[_Connection] = []
+        self._lock = threading.Lock()
+        self.__init_pool()
+
     def acquire(self) -> _Connection:
         with self._lock:
-            if self._available:
-                conn = self._available.pop()
-            elif len(self._in_use) < self._config.max_pool:
-                conn = _Connection(self._config)
-                conn.open()
-            # ...
-            self._in_use.append(conn)
-            return conn
+            # ... logic to borrow or create a connection ...
 ```
 
-## Data Lifecycle and Soft Deletion
+The presence of this pool, along with the repository abstraction, allows the application to scale to a persistent backend (like PostgreSQL or SQLite) by simply swapping the `BookmarkRepository` implementation without modifying the `BookmarkService`.
 
-The application distinguishes between hard-deletion and soft-deletion (trashing). 
-- **Hard Deletion**: Handled by the repository via methods like `delete_bookmark(bookmark_id)`, which removes the object from the internal dictionary.
-- **Soft Deletion**: Handled at the service level by updating the `status` of the `Bookmark` entity to `BookmarkStatus.TRASHED`. The repository's `list_bookmarks` method then filters these out unless specifically requested.
+## Trade-offs and Constraints
 
-```python
-def delete_bookmark(self, bookmark_id: str) -> bool:
-    """Soft-delete by trashing the bookmark."""
-    bookmark = self._repo.get_bookmark(bookmark_id)
-    if not bookmark:
-        return False
-    bookmark.trash() # Updates status to 'trashed'
-    self._repo.save_bookmark(bookmark)
-    self._cache.invalidate(bookmark_id)
-    return True
-```
+The current in-memory approach involves several design trade-offs:
+
+*   **Volatility**: All data is lost when the application process restarts. This is suitable for testing and demonstration but requires a persistent implementation for production use.
+*   **Lack of Transactions**: While the `_Connection` stub includes `begin_transaction` and `commit` methods, the `BookmarkRepository` currently lacks atomic multi-entity updates. For example, deleting a tag requires iterating through bookmarks and updating them individually, which is not currently wrapped in a transaction.
+*   **Performance of Smart Collections**: Smart collections in `app/models/collection.py` evaluate filter rules by iterating over the entire bookmark set in-memory. As the dataset grows, this O(n) operation may become a bottleneck compared to indexed database queries.
+*   **Search Index Initialization**: The `SearchIndex` is rebuilt from the repository every time the `BookmarkService` is initialized. In a large-scale system, this would be replaced by a persistent search engine like Elasticsearch or a database-backed full-text search.

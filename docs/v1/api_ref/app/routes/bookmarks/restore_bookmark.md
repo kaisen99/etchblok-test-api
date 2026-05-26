@@ -5,7 +5,7 @@
 
 Restore a bookmark from archive or trash.
 
-Restores a previously archived or trashed bookmark to its active state using its unique identifier.
+Restores a previously archived or trashed bookmark to its active state.
 
 ## Endpoint
 
@@ -23,5 +23,5 @@ POST /api/bookmarks/< bookmark_id >/restore
 
 | Status | Description |
 |--------|-------------|
-| **200** | The bookmark was successfully found and restored. Returns `object`. |
-| **404** | No bookmark was found matching the provided identifier. Returns `object`. |
+| **200** | The bookmark was successfully restored. Returns `object`. |
+| **404** | No bookmark was found with the provided identifier. Returns `object`. |

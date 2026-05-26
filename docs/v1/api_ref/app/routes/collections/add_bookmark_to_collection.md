@@ -31,5 +31,5 @@ PUT /api/collections/< collection_id >/bookmarks
 
 | Status | Description |
 |--------|-------------|
-| **204** | The bookmark was successfully added to the collection. Returns `null`. |
-| **400** | Returned if the bookmark_id is missing, the collection does not exist, or the bookmark is already present in the collection. Returns `object`. |
+| **204** | The bookmark was successfully added to the collection. |
+| **400** | Returned if the bookmark_id is missing from the request, the collection does not exist, or the bookmark is already present in the collection. Returns `object`. |

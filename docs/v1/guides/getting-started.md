@@ -1,7 +1,7 @@
 ---
 section_type: guide
 ---
-The Pagemark API is a bookmark management service built with Flask. It provides a layered architecture for managing bookmarks, tags, and collections with built-in caching and full-text search.
+Pagemark API is a bookmark management REST service built with Flask. It provides a layered architecture for organizing URLs with tags and collections, featuring full-text search and in-memory caching.
 
 ## Prerequisites
 
@@ -10,89 +10,76 @@ The Pagemark API is a bookmark management service built with Flask. It provides 
 
 ## Installation
 
-1. **Clone the repository** (if you haven't already):
-   ```bash
-   git clone <repository-url>
-   cd pagemark-api
-   ```
+1. Clone the repository and navigate to the project directory.
+2. Install the required dependencies:
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
 ## Hello World / Quick Start
 
-### 1. Start the Server
-Run the application using the provided entry point:
+To get the API up and running locally:
 
-```bash
-python run.py
-```
-The API will be available at `http://localhost:5000`.
+1. **Start the server**:
+   ```bash
+   python run.py
+   ```
+   The server will start on `http://localhost:5000` with debug mode enabled by default.
 
-### 2. Create Your First Bookmark
-Open a new terminal and use `curl` to save a bookmark:
-
-```bash
-curl -X POST http://localhost:5000/api/bookmarks/ \
+2. **Create your first bookmark**:
+   Open a new terminal and use `curl` to save a URL:
+   ```bash
+   curl -X POST http://localhost:5000/api/bookmarks/ \
      -H "Content-Type: application/json" \
-     -d '{"url": "https://flask.palletsprojects.com/", "title": "Flask Documentation"}'
-```
+     -d '{
+       "url": "https://flask.palletsprojects.com/",
+       "title": "Flask Documentation",
+       "description": "The official documentation for the Flask web framework."
+     }'
+   ```
 
-### 3. List Bookmarks
-Retrieve all saved bookmarks:
-
-```bash
-curl http://localhost:5000/api/bookmarks/
-```
+3. **Retrieve all bookmarks**:
+   ```bash
+   curl http://localhost:5000/api/bookmarks/
+   ```
 
 ## Configuration
 
-The application uses environment variables for configuration. You can set these in your shell or a `.env` file.
+The application uses environment variables for configuration. You can define these in a `.env` file in the root directory.
 
-| Variable | Description | Default (Dev) |
-|----------|-------------|---------------|
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `SECRET_KEY` | Used for session security and signing. | `change-me` |
 | `FLASK_ENV` | Set to `production` or `development`. | `development` |
 
-To run in production mode:
-```bash
-export SECRET_KEY="your-secure-key-here"
-# Then run using a production WSGI server like gunicorn
-pip install gunicorn
-gunicorn "app:create_app()"
+In `app/config.py`, the `ProductionConfig` class requires `SECRET_KEY` to be set in the environment:
+
+```python
+# Example production environment variable
+export SECRET_KEY="your-secure-random-string"
 ```
 
 ## Verify Installation
 
-You can verify that the API and its internal services are running correctly by hitting the health check endpoint:
+You can verify that the service is running and healthy by hitting the internal health check endpoint:
 
 ```bash
 curl http://localhost:5000/_internal/health
-# Expected response: {"status": "ok"}
 ```
 
-For a deeper check that includes service initialization:
+Expected response:
+```json
+{"status": "ok"}
+```
+
+For a more detailed check that verifies service initialization, use the readiness probe:
 ```bash
 curl http://localhost:5000/_internal/ready
-# Expected response: {"status": "ready"}
 ```
 
 ## Next Steps
 
-- **Explore the API**: See the full list of endpoints in the [API Reference](/api_ref/app/routes/bookmarks/list_bookmarks) documentation.
-- **Organize with Tags**: Learn how to create and assign tags to your bookmarks.
-- **Group into Collections**: Use collections to group related bookmarks together.
-- **Search**: Use the `/api/bookmarks/search?q=query` endpoint to perform full-text searches across your saved titles and descriptions.
-
-## Troubleshooting
-
-- **Port 5000 already in use**: If you see an error that the port is taken, you can change it in `run.py` or by setting the `FLASK_RUN_PORT` environment variable if using `flask run`.
-- **Missing Secret Key**: In production mode, the application will fail to start if `SECRET_KEY` is not set. Ensure it is exported in your environment.
+- **Explore the API**: See the full list of endpoints in the [API Reference](/api_ref/app) section of the README.
+- **Understand the Architecture**: Learn about the [Flask API Layered Architecture](/architecture/architecture-overview/flask-api-layered-architecture) including Services, Repositories, and Models.
+- **Search and Tags**: Learn how to use the [Overview of the Search Service](/guides/search-indexing/overview-of-the-search-service) and organize bookmarks with [Tagging and Metadata](/guides/core-entities/tagging-and-metadata).

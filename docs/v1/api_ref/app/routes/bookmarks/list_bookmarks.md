@@ -5,7 +5,7 @@
 
 Return a paginated list of bookmarks.
 
-Retrieves a paginated collection of bookmarks, with optional filtering by status.
+Retrieves a paginated collection of bookmarks with optional filtering by status.
 
 ## Endpoint
 
@@ -18,8 +18,8 @@ GET /api/bookmarks/
 | Name | Type | Description |
 |------|------|-------------|
 | **page** | `int` = 1 | The page number to retrieve for paginated results. |
-| **per_page** | `int` = 25 | The number of bookmark items to include per page, up to a maximum of 100. |
-| **status** | `string` = null | An optional filter to restrict results to bookmarks with a specific status, such as active, archived, or trashed. |
+| **per_page** | `int` = 25 | The number of bookmark items to include per page, with a maximum limit of 100. |
+| **status** | `string` = null | An optional filter to restrict results to bookmarks with a specific status such as active, archived, or trashed. |
 
 ## Response
 

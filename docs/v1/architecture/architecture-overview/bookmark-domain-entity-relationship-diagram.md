@@ -1,38 +1,42 @@
 ---
-{title: Bookmark Domain Entity Relationship Diagram, description: 'The data model for the Pagemark API centers around three core domain entities: , , and . - Bookmark: The primary entity, representing a saved URL with...', displayed_sidebar: architectureSidebar, section_type: architecture}
+{title: Bookmark Domain Entity Relationship Diagram, description: 'The Bookmark Domain Entity Relationship Diagram illustrates the core data structures and their associations within the Etchblok API. ### Core Entities -...', displayed_sidebar: architectureSidebar, section_type: architecture}
 ---
 # Bookmark Domain Entity Relationship Diagram
 
-The data model for the Pagemark API centers around three core domain entities: [Bookmark](/api_ref/app/models/bookmark/bookmark), [Collection](/api_ref/app/models/collection/collection), and [Tag](/api_ref/app/models/tag/tag). 
+The Bookmark Domain Entity Relationship Diagram illustrates the core data structures and their associations within the Etchblok API. 
 
-- **Bookmark**: The primary entity, representing a saved URL with metadata. It maintains a many-to-many relationship with **Tags** via a list of tag IDs. It also tracks its lifecycle state through a `status` field (Active, Archived, or Trashed).
-- **Tag**: A label used to organize bookmarks. It includes a `usage_count` to track how many bookmarks it is attached to and a `color` for UI categorization.
-- **Collection**: A grouping mechanism for bookmarks. Collections can be **Manual** (explicitly added bookmarks) or **Smart** (automatically populated based on a `filter_rule`). It maintains a many-to-many relationship with **Bookmarks**.
-- **User**: While not explicitly defined as a model class in the current implementation, it is a key logical entity mentioned in domain requirements (e.g., tags being unique per user).
+### Core Entities
+- **Bookmark**: The central entity representing a saved URL. It includes metadata like `title`, `description`, and `status` (Active, Archived, Trashed). It also tracks its own lifecycle via `created_at` and `updated_at` timestamps.
+- **Tag**: A label used to categorize bookmarks. Each tag has a `name`, a `color` (from a predefined set of Enums), and a `usage_count` that tracks how many bookmarks it is attached to.
+- **Collection**: A grouping mechanism for bookmarks. Collections can be **Manual** (where bookmarks are explicitly added) or **Smart** (where bookmarks are automatically included based on a `filter_rule`).
 
-The relationships are implemented using ID references in the model classes, reflecting the in-memory repository's structure where entities are stored in dictionaries and linked by their unique identifiers.
+### Relationships
+- **Bookmark-Tag Association**: A many-to-many relationship. In the code, this is implemented as a list of tag IDs within the `Bookmark` dataclass. The diagram represents this via the `BOOKMARK_TAG` association entity.
+- **Collection-Bookmark Association**: A many-to-many relationship. A collection can contain multiple bookmarks, and a bookmark can belong to multiple collections. In the code, this is managed by the `bookmark_ids` list in the `Collection` dataclass.
+
+### Implementation Details
+The system uses an in-memory repository (`BookmarkRepository`) to manage these entities. While the current implementation uses Python dataclasses and lists for relationships, the diagram reflects the logical relational model that these structures represent. Enums like `BookmarkStatus`, `TagColor`, and `CollectionType` provide domain-specific constraints on the entity attributes.
 
 **Key Architectural Findings:**
-- The system uses Python dataclasses for domain models (Bookmark, Collection, Tag).
-- Relationships are managed via lists of IDs (e.g., Bookmark.tags, Collection.bookmark_ids) rather than ORM-style object references.
-- Enums are used to define fixed states for BookmarkStatus, CollectionType, and TagColor.
-- A User entity is implied by domain constraints (e.g., Tag uniqueness) but is not yet explicitly modeled in the persistence layer.
-- Smart Collections use a filter_rule string to dynamically select bookmarks, while Manual Collections store a static list of IDs.
+- The system uses Python dataclasses (Bookmark, Tag, Collection) to represent domain entities.
+- Relationships are managed via lists of IDs (e.g., Bookmark.tags, Collection.bookmark_ids), representing many-to-many associations.
+- Enums are used for entity states and types: BookmarkStatus (ACTIVE, ARCHIVED, TRASHED), TagColor (RED, BLUE, etc.), and CollectionType (MANUAL, SMART).
+- The BookmarkRepository provides an in-memory abstraction for CRUD operations on these entities.
+- Smart Collections use a 'filter_rule' string to dynamically select bookmarks based on title or description matches.
 
 ```mermaid
 erDiagram
-    BOOKMARK }|--|{ TAG : "tagged with"
-    COLLECTION }|--|{ BOOKMARK : "contains"
-    USER ||--o{ BOOKMARK : "owns"
-    USER ||--o{ COLLECTION : "owns"
-    USER ||--o{ TAG : "owns"
+    BOOKMARK ||--o{ BOOKMARK_TAG : "tagged with"
+    TAG ||--o{ BOOKMARK_TAG : "applied to"
+    COLLECTION ||--o{ COLLECTION_BOOKMARK : "groups"
+    BOOKMARK ||--o{ COLLECTION_BOOKMARK : "included in"
 
     BOOKMARK {
         string id PK
         string url
         string title
         string description
-        string status
+        BookmarkStatus status
         datetime created_at
         datetime updated_at
         dict metadata
@@ -41,7 +45,7 @@ erDiagram
     TAG {
         string id PK
         string name
-        string color
+        TagColor color
         string description
         int usage_count
     }
@@ -49,13 +53,19 @@ erDiagram
     COLLECTION {
         string id PK
         string name
-        string collection_type
+        CollectionType collection_type
         string filter_rule
         boolean is_pinned
         datetime created_at
     }
 
-    USER {
-        string id PK
+    BOOKMARK_TAG {
+        string bookmark_id FK
+        string tag_id FK
+    }
+
+    COLLECTION_BOOKMARK {
+        string collection_id FK
+        string bookmark_id FK
     }
 ```

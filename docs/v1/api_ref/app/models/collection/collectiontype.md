@@ -9,25 +9,33 @@ The kind of collection.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **MANUAL** | `string` = manual | Represents a collection where items are added and removed by the user manually. |
-| **SMART** | `string` = smart | Represents a collection where items are automatically populated based on predefined rules or filters. |
+| **MANUAL** | `string` = manual | Represents a collection where members are added and removed individually by the user. |
+| **SMART** | `string` = smart | Represents a collection where members are automatically populated based on predefined filtering rules. |
 
 ---
 
-## Constructor
 
-### Signature
+
+## Methods
+
+---
+
+#### `MANUAL()`
 
 ```python
-def CollectionType(
-    value: string
-) - > null
+def MANUAL()
 ```
 
-### Parameters
+Represents a collection where items are added and removed manually by the user.
 
-| Name | Type | Description |
-|------|------|-------------|
-| **value** | `string` | The underlying string value representing the collection type (manual or smart) |
+---
+
+#### `SMART()`
+
+```python
+def SMART()
+```
+
+Represents a collection that automatically includes items based on predefined filtering rules or criteria.
 
 ---

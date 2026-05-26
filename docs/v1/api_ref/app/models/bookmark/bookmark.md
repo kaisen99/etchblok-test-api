@@ -9,12 +9,12 @@ A saved URL with metadata, tags, and full-text content.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier. |
 | **url** | `str` | The bookmarked URL. |
 | **title** | `str` | Human-readable title. |
 | **description** | `str` | Optional longer description. |
 | **tags** | `List[str]` = [] | List of tag IDs associated with this bookmark. |
 | **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | Current visibility status. |
+| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier. |
 | **created_at** | `datetime` = datetime.utcnow | Timestamp of creation. |
 | **updated_at** | `datetime` = datetime.utcnow | Timestamp of last modification. |
 | **metadata** | `Dict[str, Any]` = \{\} | Arbitrary key/value pairs for extensibility. |
@@ -29,9 +29,10 @@ A saved URL with metadata, tags, and full-text content.
 def Bookmark(
     url: str,
     title: str,
-    description: str,
+    description: str = "",
     tags: List[str] = [],
-    status: [BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus) = BookmarkStatus.ACTIVE
+    status: [BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus) = BookmarkStatus.ACTIVE,
+    metadata: Dict[str, Any] = {}
 ) - > null
 ```
 
@@ -40,10 +41,11 @@ def Bookmark(
 | Name | Type | Description |
 |------|------|-------------|
 | **url** | `str` | The bookmarked URL. |
-| **title** | `str` | Human-readable title for the bookmark. |
-| **description** | `str` | Optional longer description of the bookmark content. |
+| **title** | `str` | Human-readable title. |
+| **description** | `str` = "" | Optional longer description. |
 | **tags** | `List[str]` = [] | List of tag IDs associated with this bookmark. |
-| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | The initial visibility status of the bookmark. |
+| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | Current visibility status. |
+| **metadata** | `Dict[str, Any]` = \{\} | Arbitrary key/value pairs for extensibility. |
 
 ---
 
@@ -125,7 +127,7 @@ Attach a tag. Returns False if already present.
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully added, False if the tag ID already exists in the tags list |
+| `boolean` | True if the tag was successfully added, False if the tag ID already exists in the collection |
 
 ---
 
@@ -150,7 +152,7 @@ Detach a tag. Returns False if not found.
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully removed, False if the tag ID was not found in the tags list |
+| `boolean` | True if the tag was successfully removed, False if the tag ID was not found |
 
 ---
 
@@ -167,7 +169,7 @@ Serialise to a plain dictionary for JSON responses.
 
 | Type | Description |
 |------|-------------|
-| `object` | A dictionary representation of the bookmark including its ID, URL, title, status, and timestamps |
+| `object` | A dictionary containing all bookmark attributes including ID, URL, title, and timestamps in ISO format |
 
 ---
 

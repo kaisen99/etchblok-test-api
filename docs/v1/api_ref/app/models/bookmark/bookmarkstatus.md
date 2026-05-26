@@ -10,7 +10,7 @@ Visibility status of a bookmark.
 | Attribute | Type | Description |
 |----------|------|-------------|
 | **ACTIVE** | `string` = active | Indicates the bookmark is currently visible and accessible in the primary user interface. |
-| **ARCHIVED** | `string` = archived | Indicates the bookmark has been moved to long-term storage and is hidden from the main active list. |
+| **ARCHIVED** | `string` = archived | Indicates the bookmark has been moved to long-term storage and is hidden from the main list. |
 | **TRASHED** | `string` = trashed | Indicates the bookmark is marked for deletion and resides in the recycle bin. |
 
 ---
@@ -27,7 +27,7 @@ Visibility status of a bookmark.
 def ACTIVE()
 ```
 
-Represents a bookmark that is currently visible and accessible in the main collection.
+Represents a bookmark that is currently visible and accessible in the primary collection.
 
 ---
 
@@ -37,7 +37,7 @@ Represents a bookmark that is currently visible and accessible in the main colle
 def ARCHIVED()
 ```
 
-Represents a bookmark that has been moved to storage for long-term preservation and is hidden from the active list.
+Represents a bookmark that has been moved to storage for long-term preservation and is hidden from the main view.
 
 ---
 
@@ -47,6 +47,6 @@ Represents a bookmark that has been moved to storage for long-term preservation 
 def TRASHED()
 ```
 
-Represents a bookmark that has been marked for deletion and moved to the trash bin.
+Represents a bookmark that has been marked for deletion and moved to the recycle bin.
 
 ---

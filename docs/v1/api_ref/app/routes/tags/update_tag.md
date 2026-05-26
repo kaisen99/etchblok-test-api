@@ -23,12 +23,13 @@ PUT /api/tags/< tag_id >
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **data** | `object` | A JSON object containing the updated fields for the tag, such as name or color. |
+| **name** | `string` | The new name to assign to the tag. |
+| **color** | `string` | The new hex code or color name to assign to the tag. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **200** | The tag was successfully updated and the updated object is returned. Returns `object`. |
-| **400** | The update failed due to invalid input data or a service-level error. Returns `object`. |
+| **400** | The update failed due to validation errors or invalid data in the request body. Returns `object`. |
 | **404** | No tag was found matching the provided tag_id. Returns `object`. |

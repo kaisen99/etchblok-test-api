@@ -9,11 +9,11 @@ Preset colours available for tags.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **RED** | `string` = red | Represents the red color preset for tag styling. |
-| **BLUE** | `string` = blue | Represents the blue color preset for tag styling. |
-| **GREEN** | `string` = green | Represents the green color preset for tag styling. |
-| **YELLOW** | `string` = yellow | Represents the yellow color preset for tag styling. |
-| **PURPLE** | `string` = purple | Represents the purple color preset for tag styling. |
-| **GRAY** | `string` = gray | Represents the gray color preset for tag styling. |
+| **RED** | `string` = "red" | Preset color option representing a red tag. |
+| **BLUE** | `string` = "blue" | Preset color option representing a blue tag. |
+| **GREEN** | `string` = "green" | Preset color option representing a green tag. |
+| **YELLOW** | `string` = "yellow" | Preset color option representing a yellow tag. |
+| **PURPLE** | `string` = "purple" | Preset color option representing a purple tag. |
+| **GRAY** | `string` = "gray" | Preset color option representing a gray tag. |
 
 ---

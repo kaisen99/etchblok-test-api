@@ -5,7 +5,7 @@
 
 Full-text search across bookmark titles and descriptions.
 
-Performs a full-text search across bookmark titles and descriptions based on a provided query string.
+Performs a full-text search across bookmark titles and descriptions based on a search query.
 
 ## Endpoint
 
@@ -17,7 +17,7 @@ GET /api/bookmarks/search
 
 | Name | Type | Description |
 |------|------|-------------|
-| **q** | `string` | The search term or phrase used to filter bookmark titles and descriptions. |
+| **q** | `string` | The search query string used to filter bookmarks by title or description. |
 | **limit** | `integer` = 20 | The maximum number of search results to return in the response. |
 
 ## Response

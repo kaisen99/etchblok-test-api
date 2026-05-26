@@ -28,18 +28,18 @@ def Tag(
     description: str = "",
     id: str = uuid.uuid4().hex[:8],
     usage_count: int = 0
-) - > None
+)
 ```
 
 ### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| **name** | `str` | The display name of the tag. |
-| **color** | `[TagColor](tagcolor.md?sid=app_models_tag_tagcolor)` = TagColor.GRAY | The visual color assigned to the tag for UI rendering. |
-| **description** | `str` = "" | An optional description of the tag's purpose. |
-| **id** | `str` = uuid.uuid4().hex[:8] | A unique identifier for the tag. |
-| **usage_count** | `int` = 0 | The initial number of bookmarks associated with this tag. |
+| **name** | `str` | Display name of the tag. |
+| **color** | `[TagColor](tagcolor.md?sid=app_models_tag_tagcolor)` = TagColor.GRAY | Visual colour for UI rendering. |
+| **description** | `str` = "" | Optional description of what this tag represents. |
+| **id** | `str` = uuid.uuid4().hex[:8] | Unique identifier. |
+| **usage_count** | `int` = 0 | Number of bookmarks currently using this tag. |
 
 ---
 
@@ -64,13 +64,13 @@ Rename the tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **new_name** | `str` | The new display name. |
+| **new_name** | `str` | The new display name for the tag, which must be non-empty and under 50 characters. |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `None` | Nothing is returned; the tag instance is updated in place. |
 
 ---
 
@@ -87,7 +87,7 @@ Record that a bookmark now uses this tag. Returns new count.
 
 | Type | Description |
 |------|-------------|
-| `int` | The updated usage count after incrementing. |
+| `int` | The updated total number of bookmarks associated with this tag. |
 
 ---
 
@@ -104,7 +104,7 @@ Record that a bookmark removed this tag. Returns new count.
 
 | Type | Description |
 |------|-------------|
-| `int` | The updated usage count after decrementing, ensuring it does not fall below zero. |
+| `int` | The updated total number of bookmarks associated with this tag, clamped to a minimum of zero. |
 
 ---
 
@@ -121,7 +121,7 @@ Serialise to a JSON-safe dictionary.
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary representation of the tag's attributes including id, name, color, description, and usage count. |
+| `Dict[str, Any]` | A dictionary containing the tag's ID, name, color value, description, and usage count. |
 
 ---
 
@@ -140,12 +140,12 @@ Construct a Tag from a dictionary.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **data** | `Dict[str, Any]` | The dictionary containing tag attributes like name, color, and description. |
+| **data** | `Dict[str, Any]` | A dictionary containing tag attributes such as name, color, and description. |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `[Tag](tag.md?sid=app_models_tag_tag)` | A new Tag instance populated with data from the provided dictionary. |
+| `[Tag](tag.md?sid=app_models_tag_tag)` | A new instance of the Tag class populated with data from the provided dictionary. |
 
 ---

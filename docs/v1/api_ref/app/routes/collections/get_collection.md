@@ -24,4 +24,4 @@ GET /api/collections/< collection_id >
 | Status | Description |
 |--------|-------------|
 | **200** | The collection was successfully found and returned. Returns `object`. |
-| **404** | No collection exists with the provided collection_id. Returns `object`. |
+| **404** | No collection exists with the provided identifier. Returns `object`. |

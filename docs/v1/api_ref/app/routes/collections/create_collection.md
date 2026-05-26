@@ -8,7 +8,7 @@ Create a new collection.
     Expects JSON with ``name`` (required) and optional ``type`` (manual|smart)
     and ``filter_rule``.
 
-Creates a new collection for organizing items, supporting both manual and smart collection types with optional filtering rules.
+Creates a new collection for organizing items, supporting both manual and smart filtering logic.
 
 ## Endpoint
 
