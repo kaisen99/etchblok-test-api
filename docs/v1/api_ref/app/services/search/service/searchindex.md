@@ -9,8 +9,8 @@ Inverted index mapping tokens to bookmark IDs.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data during index rebuilding and search result retrieval. |
-| **_index** | `Dict[str, Set[str]]` | Inverted index mapping tokens to bookmark IDs, used to perform efficient lookups during search operations. |
+| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository used to fetch bookmark data during index rebuilding and search result retrieval. |
+| **_index** | `Dict[str, Set[str]]` | An inverted index mapping search tokens to sets of bookmark IDs for efficient lookup. |
 
 ---
 
@@ -28,7 +28,7 @@ def SearchIndex(
 
 | Name | Type | Description |
 |------|------|-------------|
-| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to populate and update the search index. |
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository to index from. |
 
 ---
 
@@ -37,14 +37,14 @@ def SearchIndex(
 ```python
 def SearchIndex(
     repository: [BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)
-) - > None
+) - > null
 ```
 
 ### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch bookmark data for indexing. |
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to fetch data for indexing and retrieval. |
 
 ---
 
@@ -60,7 +60,7 @@ def SearchIndex(
 @classmethod
 def index_bookmark(
     bookmark: [Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)
-) - > None
+) - > null
 ```
 
 Add or update a bookmark in the index.
@@ -75,7 +75,7 @@ Add or update a bookmark in the index.
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `null` |  |
 
 ---
 
@@ -85,7 +85,7 @@ Add or update a bookmark in the index.
 @classmethod
 def remove_bookmark(
     bookmark_id: str
-) - > None
+) - > null
 ```
 
 Remove a bookmark from the index.
@@ -100,7 +100,7 @@ Remove a bookmark from the index.
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `null` |  |
 
 ---
 

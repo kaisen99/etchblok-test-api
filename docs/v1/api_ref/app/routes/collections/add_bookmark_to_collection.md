@@ -7,7 +7,7 @@ Add a bookmark to a collection.
 
     Expects JSON with ``bookmark_id``.
 
-Adds an existing bookmark to a specific collection by their respective identifiers.
+Adds an existing bookmark to a specific collection by its unique identifier.
 
 ## Endpoint
 
@@ -32,4 +32,4 @@ PUT /api/collections/< collection_id >/bookmarks
 | Status | Description |
 |--------|-------------|
 | **204** | The bookmark was successfully added to the collection. |
-| **400** | Returned if the bookmark_id is missing from the request, the collection does not exist, or the bookmark is already present in the collection. Returns `object`. |
+| **400** | Returned if the bookmark_id is missing from the request body, the collection does not exist, or the bookmark is already present in the collection. Returns `object`. |

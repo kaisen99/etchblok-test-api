@@ -7,7 +7,7 @@ Create a new bookmark.
 
     Expects a JSON body with ``url`` (required) and ``title`` (required).
 
-Creates a new bookmark entry for the user by providing a URL and a descriptive title.
+Creates a new bookmark entry for the user based on a provided URL and title.
 
 ## Endpoint
 
@@ -19,12 +19,12 @@ POST /api/bookmarks/
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **url** | `string` | The destination URL address for the bookmark. |
-| **title** | `string` | A user-defined title or label for the bookmark. |
+| **url** | `string` | The full URL of the website to be bookmarked. |
+| **title** | `string` | The display title or name assigned to the bookmark. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **201** | The bookmark was successfully created. Returns `object`. |
-| **400** | The request was invalid or the bookmark could not be created due to a service error. Returns `object`. |
+| **400** | The request was invalid, likely due to missing required fields or a malformed URL. Returns `object`. |

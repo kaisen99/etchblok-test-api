@@ -5,7 +5,7 @@
 
 Delete a tag and remove it from all bookmarks.
 
-Permanently deletes a specific tag and removes its association from all bookmarks currently using it.
+Permanently deletes a specific tag and removes its association from all bookmarks.
 
 ## Endpoint
 
@@ -23,5 +23,5 @@ DELETE /api/tags/< tag_id >
 
 | Status | Description |
 |--------|-------------|
-| **204** | The tag was successfully deleted and removed from all bookmarks. |
+| **204** | The tag was successfully deleted. |
 | **404** | The specified tag ID does not exist in the system. Returns `object`. |

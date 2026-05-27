@@ -9,20 +9,12 @@ Configuration for test runs.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **TESTING** | `bool` = True | Flag indicating that the application is running in a test environment, typically used to disable error catching or enable mock services. |
-| **PAGE_SIZE** | `int` = 5 | The number of items to return per page in paginated test results. |
+| **TESTING** | `bool` = True | Flag indicating that the application is running in a test environment, typically used to enable mock behaviors or bypass security checks. |
+| **PAGE_SIZE** | `int` = 5 | The number of records to return per page in paginated test results, constrained to a small fixed value for consistent test assertions. |
 
 ---
 
 ## Constructor
-
-### Signature
-
-```python
-def TestingConfig() - > null
-```
-
----
 
 ### Signature
 

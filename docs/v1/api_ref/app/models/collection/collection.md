@@ -12,10 +12,10 @@ A named group of bookmarks.
 | **name** | `str` | Display name. |
 | **collection_type** | `[CollectionType](collectiontype.md?sid=app_models_collection_collectiontype)` = CollectionType.MANUAL | Whether the collection is manual or smart. |
 | **bookmark_ids** | `List[str]` = [] | Ordered list of bookmark IDs in the collection. |
-| **filter_rule** | `str` | For smart collections, a query string that selects bookmarks. |
+| **filter_rule** | `str` = "" | For smart collections, a query string that selects bookmarks. |
 | **is_pinned** | `bool` = false | Whether the collection appears at the top of the sidebar. |
-| **id** | `str` | Unique identifier. |
-| **created_at** | `datetime` | Creation timestamp. |
+| **id** | `str` = uuid.uuid4().hex[:10] | Unique identifier. |
+| **created_at** | `datetime` = datetime.utcnow | Creation timestamp. |
 
 ---
 
@@ -115,7 +115,7 @@ Remove a bookmark from the collection.
 @classmethod
 def reorder(
     bookmark_ids: List[str]
-) - > null
+)
 ```
 
 Replace the bookmark ordering.
@@ -126,28 +126,16 @@ Replace the bookmark ordering.
 |------|------|-------------|
 | **bookmark_ids** | `List[str]` | New ordered list. Must contain the same IDs. |
 
-#### Returns
-
-| Type | Description |
-|------|-------------|
-| `null` |  |
-
 ---
 
 #### `pin()`
 
 ```python
 @classmethod
-def pin() - > null
+def pin()
 ```
 
 Pin the collection to the top of the sidebar.
-
-#### Returns
-
-| Type | Description |
-|------|-------------|
-| `null` |  |
 
 ---
 
@@ -155,16 +143,10 @@ Pin the collection to the top of the sidebar.
 
 ```python
 @classmethod
-def unpin() - > null
+def unpin()
 ```
 
 Unpin the collection.
-
-#### Returns
-
-| Type | Description |
-|------|-------------|
-| `null` |  |
 
 ---
 

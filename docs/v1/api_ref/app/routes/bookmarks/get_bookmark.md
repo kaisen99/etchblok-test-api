@@ -24,4 +24,4 @@ GET /api/bookmarks/< bookmark_id >
 | Status | Description |
 |--------|-------------|
 | **200** | The bookmark was successfully found and returned Returns `object`. |
-| **404** | No bookmark exists with the provided identifier Returns `object`. |
+| **404** | No bookmark exists with the provided ID Returns `object`. |

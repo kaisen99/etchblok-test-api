@@ -17,12 +17,12 @@ DELETE /api/collections/< collection_id >/bookmarks/< bookmark_id >
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `string` | The unique identifier of the collection from which the bookmark will be removed. |
-| **bookmark_id** | `string` | The unique identifier of the bookmark to be removed from the collection. |
+| **collection_id** | `string` | The unique identifier of the collection from which the bookmark will be removed |
+| **bookmark_id** | `string` | The unique identifier of the bookmark to be removed from the collection |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
-| **204** | The bookmark was successfully removed from the collection. |
-| **404** | The specified collection or bookmark could not be found. Returns `object`. |
+| **204** | The bookmark was successfully removed from the collection |
+| **404** | The specified collection or bookmark could not be found Returns `object`. |

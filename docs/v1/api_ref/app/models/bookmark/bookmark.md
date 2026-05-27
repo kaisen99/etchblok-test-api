@@ -32,8 +32,11 @@ def Bookmark(
     description: str = "",
     tags: List[str] = [],
     status: [BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus) = BookmarkStatus.ACTIVE,
+    id: str = uuid.uuid4().hex[:12],
+    created_at: datetime = datetime.utcnow,
+    updated_at: datetime = datetime.utcnow,
     metadata: Dict[str, Any] = {}
-) - > null
+) - > None
 ```
 
 ### Parameters
@@ -41,10 +44,13 @@ def Bookmark(
 | Name | Type | Description |
 |------|------|-------------|
 | **url** | `str` | The bookmarked URL. |
-| **title** | `str` | Human-readable title. |
-| **description** | `str` = "" | Optional longer description. |
+| **title** | `str` | Human-readable title for the bookmark. |
+| **description** | `str` = "" | Optional longer description of the bookmark. |
 | **tags** | `List[str]` = [] | List of tag IDs associated with this bookmark. |
-| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | Current visibility status. |
+| **status** | `[BookmarkStatus](bookmarkstatus.md?sid=app_models_bookmark_bookmarkstatus)` = BookmarkStatus.ACTIVE | The initial visibility status of the bookmark. |
+| **id** | `str` = uuid.uuid4().hex[:12] | Unique identifier for the bookmark. |
+| **created_at** | `datetime` = datetime.utcnow | Timestamp of creation. |
+| **updated_at** | `datetime` = datetime.utcnow | Timestamp of last modification. |
 | **metadata** | `Dict[str, Any]` = \{\} | Arbitrary key/value pairs for extensibility. |
 
 ---
@@ -127,7 +133,7 @@ Attach a tag. Returns False if already present.
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully added, False if the tag ID already exists in the collection |
+| `boolean` | True if the tag was successfully added, False if the tag ID already exists in the tags list |
 
 ---
 
@@ -152,7 +158,7 @@ Detach a tag. Returns False if not found.
 
 | Type | Description |
 |------|-------------|
-| `boolean` | True if the tag was successfully removed, False if the tag ID was not found |
+| `boolean` | True if the tag was successfully removed, False if the tag ID was not found in the tags list |
 
 ---
 
@@ -169,7 +175,7 @@ Serialise to a plain dictionary for JSON responses.
 
 | Type | Description |
 |------|-------------|
-| `object` | A dictionary containing all bookmark attributes including ID, URL, title, and timestamps in ISO format |
+| `object` | A dictionary containing the bookmark's attributes, including serialized timestamps and status values |
 
 ---
 

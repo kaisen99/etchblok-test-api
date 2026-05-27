@@ -23,5 +23,5 @@ DELETE /api/bookmarks/< bookmark_id >
 
 | Status | Description |
 |--------|-------------|
-| **204** | The bookmark was successfully soft-deleted. Returns `null`. |
+| **204** | The bookmark was successfully soft-deleted. |
 | **404** | The specified bookmark identifier does not exist in the system. Returns `object`. |
