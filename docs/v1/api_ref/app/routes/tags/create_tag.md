@@ -1,5 +1,9 @@
 ---
-{title: POST /api/tags/, description: API Reference for app.routes.tags.create_tag, section_id: app_routes_tags_create_tag, section_type: function_ref}
+title: POST /api/tags/
+description: API Reference for app.routes.tags.create_tag
+code_symbols: [SYM#72b8dfe7559ef56984fbc44dcc8c0770c10cc084]
+section_id: app_routes_tags_create_tag
+section_type: function_ref
 ---
 # POST /api/tags/
 
@@ -20,11 +24,11 @@ POST /api/tags/
 | Field | Type | Description |
 |-------|------|-------------|
 | **name** | `string` | The unique name of the tag to be created. |
-| **color** | `string` | An optional color hex code or name to associate with the tag for UI categorization. |
+| **color** | `string` | An optional hex code or color name to visually distinguish the tag. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **201** | The tag was successfully created. Returns `object`. |
-| **400** | The request was invalid, typically due to a missing name or a validation error from the service layer. Returns `object`. |
+| **400** | The request was invalid, typically due to a missing name or a validation error from the service. Returns `object`. |

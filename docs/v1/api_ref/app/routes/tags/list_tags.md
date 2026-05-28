@@ -1,5 +1,9 @@
 ---
-{title: GET /api/tags/, description: API Reference for app.routes.tags.list_tags, section_id: app_routes_tags_list_tags, section_type: function_ref}
+title: GET /api/tags/
+description: API Reference for app.routes.tags.list_tags
+code_symbols: [SYM#664f5fff458dcb459ee90a98b17daf38f83f771a]
+section_id: app_routes_tags_list_tags
+section_type: function_ref
 ---
 # GET /api/tags/
 

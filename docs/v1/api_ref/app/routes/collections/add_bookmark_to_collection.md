@@ -1,5 +1,9 @@
 ---
-{title: PUT /api/collections/< collection_id >/bookmarks, description: API Reference for app.routes.collections.add_bookmark_to_collection, section_id: app_routes_collections_add_bookmark_to_collection, section_type: function_ref}
+title: PUT /api/collections/< collection_id >/bookmarks
+description: API Reference for app.routes.collections.add_bookmark_to_collection
+code_symbols: [SYM#91a8a75c1e72351e2c510365af1e59a9984f66f8]
+section_id: app_routes_collections_add_bookmark_to_collection
+section_type: function_ref
 ---
 # PUT /api/collections/< collection_id >/bookmarks
 

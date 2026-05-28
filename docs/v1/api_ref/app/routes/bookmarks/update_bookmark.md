@@ -1,11 +1,15 @@
 ---
-{title: PUT /api/bookmarks/< bookmark_id >, description: API Reference for app.routes.bookmarks.update_bookmark, section_id: app_routes_bookmarks_update_bookmark, section_type: function_ref}
+title: PUT /api/bookmarks/< bookmark_id >
+description: API Reference for app.routes.bookmarks.update_bookmark
+code_symbols: [SYM#3166e25b280fae99829f37ae692d4d466624a6ee]
+section_id: app_routes_bookmarks_update_bookmark
+section_type: function_ref
 ---
 # PUT /api/bookmarks/< bookmark_id >
 
 Update an existing bookmark.
 
-    Only the fields present in the JSON body are updated.
+Only the fields present in the JSON body are updated.
 
 Updates an existing bookmark's information by its unique identifier, applying only the fields provided in the request body.
 

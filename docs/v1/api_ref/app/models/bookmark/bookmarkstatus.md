@@ -1,5 +1,9 @@
 ---
-{title: BookmarkStatus, description: API Reference for app.models.bookmark.BookmarkStatus, section_id: app_models_bookmark_bookmarkstatus, section_type: class_ref}
+title: BookmarkStatus
+description: API Reference for app.models.bookmark.BookmarkStatus
+code_symbols: [SYM#d570461c1ff2b0eb81e078e185a46de87938f933]
+section_id: app_models_bookmark_bookmarkstatus
+section_type: class_ref
 ---
 # BookmarkStatus
 
@@ -47,6 +51,6 @@ Represents a bookmark that has been moved to long-term storage and is hidden fro
 def TRASHED()
 ```
 
-Represents a bookmark that has been marked for deletion and is pending permanent removal.
+Represents a bookmark that has been marked for deletion and moved to the trash.
 
 ---

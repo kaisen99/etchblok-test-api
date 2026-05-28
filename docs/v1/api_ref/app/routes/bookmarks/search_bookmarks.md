@@ -1,11 +1,15 @@
 ---
-{title: GET /api/bookmarks/search, description: API Reference for app.routes.bookmarks.search_bookmarks, section_id: app_routes_bookmarks_search_bookmarks, section_type: function_ref}
+title: GET /api/bookmarks/search
+description: API Reference for app.routes.bookmarks.search_bookmarks
+code_symbols: [SYM#3d922bf6a16c0b6994ee5ce8cd194b66d7725a6f]
+section_id: app_routes_bookmarks_search_bookmarks
+section_type: function_ref
 ---
 # GET /api/bookmarks/search
 
 Full-text search across bookmark titles and descriptions.
 
-Performs a full-text search across all bookmark titles and descriptions to find relevant entries based on a search string.
+Performs a full-text search across bookmark titles and descriptions based on a provided query string.
 
 ## Endpoint
 
@@ -17,8 +21,8 @@ GET /api/bookmarks/search
 
 | Name | Type | Description |
 |------|------|-------------|
-| **q** | `string` | The search query string used to filter bookmarks by their title or description content. |
-| **limit** | `integer` = 20 | The maximum number of search results to return in the response for pagination control. |
+| **q** | `string` | The search term or phrase used to filter bookmarks by their title or description content. |
+| **limit** | `integer` = 20 | The maximum number of search results to return in the response. |
 
 ## Response
 

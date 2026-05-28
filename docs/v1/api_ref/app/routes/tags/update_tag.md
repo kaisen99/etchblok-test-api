@@ -1,5 +1,9 @@
 ---
-{title: PUT /api/tags/< tag_id >, description: API Reference for app.routes.tags.update_tag, section_id: app_routes_tags_update_tag, section_type: function_ref}
+title: PUT /api/tags/< tag_id >
+description: API Reference for app.routes.tags.update_tag
+code_symbols: [SYM#c5e70449a6d0f7b769b90bb12453a7342673bb15]
+section_id: app_routes_tags_update_tag
+section_type: function_ref
 ---
 # PUT /api/tags/< tag_id >
 
@@ -23,12 +27,13 @@ PUT /api/tags/< tag_id >
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **data** | `object` | A JSON object containing the fields to update, typically including the new name or color for the tag. |
+| **name** | `string` | The new name to assign to the tag. |
+| **color** | `string` | The new hex code or color name to assign to the tag. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
-| **200** | The tag was successfully updated. Returns `object`. |
-| **400** | The update failed due to invalid input data or a service error. Returns `object`. |
-| **404** | No tag was found with the specified identifier. Returns `object`. |
+| **200** | The tag was successfully updated and the updated object is returned. Returns `object`. |
+| **400** | The update failed due to validation errors or invalid data in the request body. Returns `object`. |
+| **404** | No tag was found matching the provided tag_id. Returns `object`. |

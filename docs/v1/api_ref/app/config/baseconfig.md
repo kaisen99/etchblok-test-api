@@ -1,5 +1,9 @@
 ---
-{title: BaseConfig, description: API Reference for app.config.BaseConfig, section_id: app_config_baseconfig, section_type: class_ref}
+title: BaseConfig
+description: API Reference for app.config.BaseConfig
+code_symbols: [SYM#7dcc662114beb69932d02b031db76440ec4fc17c, SYM#0e49d61e810852b823b0d749c456e38617905bb6, SYM#af12fc21dfc802b33c302dbac85300dea45d5c2c]
+section_id: app_config_baseconfig
+section_type: class_ref
 ---
 # BaseConfig
 
@@ -9,10 +13,10 @@ Base configuration shared across all environments.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **SECRET_KEY** | `str` = change-me | Cryptographic key used for signing session cookies and securing sensitive data, defaulting to an environment variable or a fallback string. |
+| **SECRET_KEY** | `str` = change-me | Cryptographic key used for signing session cookies and protecting sensitive data, defaulting to an environment variable or a fallback string. |
 | **DEBUG** | `bool` = false | Flag that enables or disables detailed error pages and development-specific features. |
-| **TESTING** | `bool` = false | Flag that indicates whether the application is running in a test environment to modify error handling and behavior. |
-| **PAGE_SIZE** | `int` = DEFAULT_PAGE_SIZE | The number of items to return per page in paginated responses, which must not exceed the maximum allowed page size. |
+| **TESTING** | `bool` = false | Boolean toggle that activates testing mode to suppress email sending and enable test-specific error reporting. |
+| **PAGE_SIZE** | `int` = DEFAULT_PAGE_SIZE | Integer defining the number of records returned per request in paginated responses, constrained by a system-wide maximum. |
 
 ---
 
@@ -35,6 +39,6 @@ Return cache settings for this environment.
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary containing the cache configuration parameters used to initialize the caching backend |
+| `Dict[str, Any]` | A dictionary containing the environment-specific cache configuration settings |
 
 ---

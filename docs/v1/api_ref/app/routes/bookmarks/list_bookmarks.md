@@ -1,5 +1,9 @@
 ---
-{title: GET /api/bookmarks/, description: API Reference for app.routes.bookmarks.list_bookmarks, section_id: app_routes_bookmarks_list_bookmarks, section_type: function_ref}
+title: GET /api/bookmarks/
+description: API Reference for app.routes.bookmarks.list_bookmarks
+code_symbols: [SYM#78c1893d04f589140f920602d5bbff8f291545b0]
+section_id: app_routes_bookmarks_list_bookmarks
+section_type: function_ref
 ---
 # GET /api/bookmarks/
 
@@ -18,8 +22,8 @@ GET /api/bookmarks/
 | Name | Type | Description |
 |------|------|-------------|
 | **page** | `int` = 1 | The page number to retrieve for paginated results. |
-| **per_page** | `int` = 25 | The number of bookmark items to include in a single response page, capped at 100. |
-| **status** | `string` = null | An optional filter to restrict results to bookmarks with a specific state, such as active, archived, or trashed. |
+| **per_page** | `int` = 25 | The number of bookmark items to include in a single response page (maximum 100). |
+| **status** | `string` = null | A filter to restrict results to bookmarks with a specific state, such as active, archived, or trashed. |
 
 ## Response
 

@@ -1,5 +1,9 @@
 ---
-{title: DELETE /api/bookmarks/< bookmark_id >, description: API Reference for app.routes.bookmarks.delete_bookmark, section_id: app_routes_bookmarks_delete_bookmark, section_type: function_ref}
+title: DELETE /api/bookmarks/< bookmark_id >
+description: API Reference for app.routes.bookmarks.delete_bookmark
+code_symbols: [SYM#d033c945f82802d088d40873b935446b86a31385]
+section_id: app_routes_bookmarks_delete_bookmark
+section_type: function_ref
 ---
 # DELETE /api/bookmarks/< bookmark_id >
 
@@ -23,5 +27,5 @@ DELETE /api/bookmarks/< bookmark_id >
 
 | Status | Description |
 |--------|-------------|
-| **204** | The bookmark was successfully soft-deleted. |
-| **404** | The specified bookmark identifier does not exist in the system. Returns `object`. |
+| **204** | The bookmark was successfully soft-deleted. Returns `null`. |
+| **404** | The bookmark with the specified ID could not be found. Returns `object`. |

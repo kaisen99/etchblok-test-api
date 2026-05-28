@@ -1,5 +1,9 @@
 ---
-{title: BookmarkRepository, description: API Reference for app.db.repository.BookmarkRepository, section_id: app_db_repository_bookmarkrepository, section_type: class_ref}
+title: BookmarkRepository
+description: API Reference for app.db.repository.BookmarkRepository
+code_symbols: [SYM#adb8232356346a5957ff3a1a1b7ff70581f37649, SYM#49e1f24ffd02e7fb48b7423f93317f802df23b5f, SYM#5b3e3715ef1a71f5a77f03d92bf6c5f51a48ad32, SYM#cf9a8e7f54f57a8cd339010d13705db8b026148f, SYM#e1849a54b7006099f2c1a44a31c94da46e4a68a8, SYM#f82b48b96fecddaa17325e209241224a683b6b1e, SYM#16a62952ebf5e363e2fe2df8d76f5e2297687ce8, SYM#587181a63788f5055d51b13321cc17c22d1fd166, SYM#98006983eea9b96cd75a67c455f085a8d8b6393a, SYM#c3c446050d26df08e7387c7b3d8639ebee63a9ae, SYM#6f0cb7bb3ce7d5a67ae8855994b59d8ac5907683, SYM#aece75f08f6ead9952affe9965e98fe31f618694, SYM#10dc4cf94d5e3181773310dea721641426f217b1, SYM#4107010ed55b4ee632caf65fe1ee3ba3fd493f86, SYM#b739368d1d2dd1698c0dc2cfe42e7cdd5a083aa2, SYM#3864efcb492a0b2d68004d16c502ecff2b8ba25c]
+section_id: app_db_repository_bookmarkrepository
+section_type: class_ref
 ---
 # BookmarkRepository
 
@@ -9,9 +13,9 @@ In-memory storage for bookmarks, tags, and collections.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal mapping of unique bookmark IDs to their respective Bookmark objects for persistent in-memory storage. |
-| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal mapping of unique tag IDs to Tag objects used to manage and retrieve bookmark categorization data. |
-| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal mapping of unique collection IDs to Collection objects for organizing bookmarks into grouped structures. |
+| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal dictionary mapping unique bookmark IDs to Bookmark objects for persistent in-memory storage. |
+| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal dictionary mapping unique tag IDs to Tag objects used for organizing and filtering bookmarks. |
+| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal dictionary mapping unique collection IDs to Collection objects for grouping related bookmarks. |
 
 ---
 
@@ -60,7 +64,7 @@ Insert or update a bookmark.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -104,7 +108,7 @@ Hard-delete a bookmark. Returns True if it existed.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be permanently removed |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be deleted |
 
 #### Returns
 
@@ -131,9 +135,9 @@ Return a paginated slice of bookmarks.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **page** | `int` = 1 | The 1-based page index for pagination |
-| **per_page** | `int` = 25 | The maximum number of bookmark items to return per page |
-| **status** | `Optional[str]` = None | An optional filter to restrict results by status, such as 'active', 'archived', or 'trashed' |
+| **page** | `int` = 1 | 1-based page index used to calculate the starting offset |
+| **per_page** | `int` = 25 | The maximum number of items to return in a single page |
+| **status** | `Optional[str]` = None | Optional status filter string (active, archived, trashed) to narrow down results |
 
 #### Returns
 
@@ -189,7 +193,7 @@ Insert or update a tag.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -233,7 +237,7 @@ Hard-delete a tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to be permanently removed |
+| **tag_id** | `str` | The unique identifier of the tag to be deleted |
 
 #### Returns
 
@@ -256,7 +260,7 @@ Return all tags.
 
 | Type | Description |
 |------|-------------|
-| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all Tag objects stored in the repository |
+| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list containing all Tag objects stored in the repository |
 
 ---
 
@@ -281,7 +285,7 @@ Insert or update a collection.
 
 | Type | Description |
 |------|-------------|
-| `None` | Nothing |
+| `None` |  |
 
 ---
 
@@ -325,7 +329,7 @@ Hard-delete a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the collection to be permanently removed |
+| **collection_id** | `str` | The unique identifier of the collection to be deleted |
 
 #### Returns
 
@@ -348,6 +352,6 @@ Return all collections.
 
 | Type | Description |
 |------|-------------|
-| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all Collection objects stored in the repository |
+| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list containing all Collection objects stored in the repository |
 
 ---

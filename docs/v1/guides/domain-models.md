@@ -1,53 +1,63 @@
 ---
 title: Domain Models
-description: Core data structures representing bookmarks, tags, and collections, including their metadata and serialization logic.
-code_symbols: [SYM#d731bc2f45cac29b2961ab00083bab5345db0a5e, SYM#e15c91e9e7eae95d052f50388a60d0bc30b3fe67, SYM#97d8a6cbf0c47108aa2beb39fafa695229654067]
-section_id: e48ba199-e683-4177-a1e6-a09f64b8fb0a_domain_models
+description: Core entities representing bookmarks, tags, and collections, including their metadata and state transitions.
+code_symbols: [SYM#d731bc2f45cac29b2961ab00083bab5345db0a5e, SYM#97d8a6cbf0c47108aa2beb39fafa695229654067, SYM#e15c91e9e7eae95d052f50388a60d0bc30b3fe67]
+section_id: 2b89a92c-4d1a-40b2-bf76-dc070458998f_domain_models
 doc_type: explanation
 section_type: guide
 ---
-The domain models in this project serve as the central source of truth for data structures and business logic. Implemented primarily using Python's `dataclasses`, these models encapsulate the state and behavior of bookmarks, tags, and collections while providing consistent serialization patterns for the API layer.
+The domain models in this project serve as the core source of truth for the application's business logic. Implemented using Python's `dataclasses`, these entities encapsulate both the state and the fundamental behaviors of bookmarks, tags, and collections.
 
-## Core Entities and Dataclasses
+## The Bookmark Entity
 
-The project utilizes `dataclasses` to define its primary entities. This choice provides a concise syntax for defining data-heavy objects while automatically generating standard methods like `__init__` and `__repr__`.
+The `Bookmark` class in `app/models/bookmark.py` is the central entity of the system. It represents a saved URL along with its associated metadata and organizational state.
 
-### The Bookmark Entity
-The `Bookmark` class in `app/models/bookmark.py` is the most complex entity. It manages not only the URL and metadata but also the lifecycle state of the saved content.
+### Lifecycle and State Transitions
+A bookmark's visibility is managed through the `BookmarkStatus` enum, which defines three states: `ACTIVE`, `ARCHIVED`, and `TRASHED`. The model provides explicit methods to transition between these states, ensuring that the `updated_at` timestamp is always synchronized via the internal `_touch()` helper.
+
+```python
+def archive(self) -> None:
+    """Move the bookmark to the archive."""
+    self.status = BookmarkStatus.ARCHIVED
+    self._touch()
+
+def trash(self) -> None:
+    """Soft-delete the bookmark by moving it to the trash."""
+    self.status = BookmarkStatus.TRASHED
+    self._touch()
+```
+
+### Identity and Metadata
+Bookmarks use a unique 12-character hex string for their ID, generated upon instantiation. They also support an extensible `metadata` dictionary for storing arbitrary key/value pairs, allowing the model to adapt to different types of content without schema changes.
+
+## Tags and Organization
+
+The `Tag` model in `app/models/tag.py` provides a flexible labeling system. Unlike bookmarks, tags are lightweight entities focused on categorization and UI presentation.
+
+### Usage Tracking
+Tags maintain a `usage_count` to track how many bookmarks are currently associated with them. This count is updated via `increment_usage()` and `decrement_usage()` methods, which are typically orchestrated by the service layer when tags are added to or removed from bookmarks.
+
+### Visual Representation
+The `TagColor` enum provides a set of predefined colors (`RED`, `BLUE`, `GREEN`, `YELLOW`, `PURPLE`, `GRAY`) used for UI rendering. By default, new tags are assigned `TagColor.GRAY`.
 
 ```python
 @dataclass
-class Bookmark:
-    url: str
-    title: str
-    description: str = ""
-    tags: List[str] = field(default_factory=list)
-    status: BookmarkStatus = BookmarkStatus.ACTIVE
-    id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+class Tag:
+    name: str
+    color: TagColor = TagColor.GRAY
+    id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
+    usage_count: int = 0
 ```
-
-The model includes explicit state transition methods that ensure the `updated_at` timestamp is refreshed via an internal `_touch()` helper whenever the status changes:
-
-*   `archive()`: Sets status to `BookmarkStatus.ARCHIVED`.
-*   `trash()`: Sets status to `BookmarkStatus.TRASHED` (soft-delete).
-*   `restore()`: Returns the bookmark to `BookmarkStatus.ACTIVE`.
-
-### Tag Management
-The `Tag` model in `app/models/tag.py` handles categorization. Unlike bookmarks, tags maintain a `usage_count` to track how many bookmarks are associated with them. This count is managed through `increment_usage()` and `decrement_usage()` methods, which are typically called by the service layer during bookmark updates.
-
-Tags also include a `TagColor` enum to support UI-level customization and a `_normalize_name()` method to facilitate uniqueness checks by stripping whitespace and casing.
 
 ## Collections: Manual vs. Smart
 
-The `Collection` model in `app/models/collection.py` supports two distinct organizational strategies defined by the `CollectionType` enum:
+Collections, defined in `app/models/collection.py`, allow for higher-level grouping of bookmarks. The system distinguishes between two types of collections via the `CollectionType` enum.
 
-1.  **Manual Collections**: Users explicitly add or remove bookmark IDs using `add_bookmark()` and `remove_bookmark()`. These collections support custom ordering via the `reorder()` method, which validates that the new list of IDs exactly matches the existing set.
-2.  **Smart Collections**: These are dynamic groups defined by a `filter_rule`. They do not allow manual addition of bookmarks (the `add_bookmark` method returns `False` for smart collections).
+### Manual Collections
+In a `MANUAL` collection, users explicitly add or remove bookmark IDs. The model supports custom ordering through the `reorder()` method, which validates that the new list of IDs matches the existing set to prevent data loss.
 
-The logic for smart collections is encapsulated in the `_apply_filter` method:
+### Smart Collections
+`SMART` collections are dynamic. They use a `filter_rule` (a simple keyword string) to automatically include bookmarks. The `_apply_filter()` method implements this logic by checking for the keyword within bookmark titles and descriptions:
 
 ```python
 def _apply_filter(self, bookmarks: list) -> List[str]:
@@ -57,28 +67,27 @@ def _apply_filter(self, bookmarks: list) -> List[str]:
     return [b.id for b in bookmarks if keyword in b.title.lower() or keyword in b.description.lower()]
 ```
 
-This implementation uses a naive case-insensitive substring match against the bookmark's title and description to determine membership.
+Note that `add_bookmark()` will return `False` if called on a smart collection, as their membership is governed strictly by the filter rule.
 
-## Serialization and Data Integrity
+## Data Integrity and Validation
 
-The models implement a consistent interface for moving data between the application and external interfaces (like the database or API).
-
-### Serialization Logic
-Each model provides a `to_dict()` method for JSON serialization and a `from_dict()` class method for instantiation from request payloads. 
-
-A notable design choice in `Bookmark.from_dict` is its restrictiveness: it only accepts `url`, `title`, `description`, and `tags`. Internal fields like `id`, `status`, and timestamps are intentionally omitted from this method to prevent clients from overriding system-generated metadata during creation.
+The project maintains data integrity through a combination of model-level methods and internal validation helpers in `app/models/_validators.py`.
 
 ### Validation Constraints
-The `app/models/_validators.py` module provides internal helpers that enforce business rules across the models. These include:
+- **Reserved Names**: Certain tag names like `all`, `untagged`, `archived`, and `trash` are reserved and cannot be used for user-created tags.
+- **Length Limits**: Titles are capped at 256 characters (`_MAX_TITLE_LENGTH`), descriptions at 2048 (`_MAX_DESCRIPTION_LENGTH`), and tag names at 50 characters.
+- **URL Format**: A regex-based validator ensures that bookmarks contain valid `http` or `https` URLs.
 
-*   **URL Validation**: A regex-based check in `_validate_url` ensuring proper protocol and format.
-*   **Reserved Names**: The `_RESERVED_TAG_NAMES` constant prevents users from creating tags named "all", "untagged", "archived", or "trash", as these names are reserved for system-level filtering.
-*   **Length Limits**: Titles are capped at 256 characters, and descriptions at 2048 characters.
+### Serialization
+Every domain model implements `to_dict()` and `from_dict()` methods. This pattern ensures a clean separation between the internal domain representation and the external JSON format used by the API routes. The `from_dict()` methods are designed to be resilient, often providing default values for optional fields like descriptions or tags.
 
-## Implementation Tradeoffs
-
-Several design decisions in the domain models reflect specific tradeoffs:
-
-*   **Truncated Identifiers**: The project uses truncated UUIDs for IDs (e.g., `uuid.uuid4().hex[:12]` for bookmarks and `[:8]` for tags). While this results in shorter, more user-friendly URLs and identifiers, it increases the theoretical risk of collisions compared to full 128-bit UUIDs.
-*   **Naive Filtering**: The smart collection filtering logic is limited to basic substring matching. It does not support complex boolean logic (AND/OR) or tag-based filtering within the `filter_rule` itself.
-*   **In-Memory State**: The `usage_count` on the `Tag` model is a cached value. If the database and the model instances fall out of sync, the `usage_count` may reflect inaccurate data until a full recount is performed.
+```python
+@classmethod
+def from_dict(cls, data: Dict[str, Any]) -> "Bookmark":
+    return cls(
+        url=data["url"],
+        title=data["title"],
+        description=data.get("description", ""),
+        tags=data.get("tags", []),
+    )
+```
