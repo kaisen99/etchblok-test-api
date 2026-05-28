@@ -2,7 +2,7 @@
 title: Implementing Full-Text Search
 description: How to leverage the search index through the service orchestration layer to retrieve bookmarks.
 code_symbols: [SYM#fdcfaed9972e477ae4585fd1b279ac107fa534cd]
-section_id: 4b3d87d3-044d-451d-919d-80563d288a3c_implementing_full-text_search
+section_id: 4b3d87d3-044d-451d-919d-80563d284a3c_implementing_full-text_search
 doc_type: how_to
 section_type: guide
 ---
@@ -10,7 +10,7 @@ To perform full-text searches across bookmarks in this project, you use the `Boo
 
 ## Searching for Bookmarks
 
-The most direct way to search is by calling the `search` method on the `BookmarkService` singleton.
+The most direct way to search is by calling the `full_text_search` method on the `BookmarkService` singleton.
 
 ```python
 from app.services.bookmark_service import BookmarkService
@@ -20,7 +20,7 @@ service = BookmarkService()
 
 # Search for bookmarks containing "python" and "tutorial"
 # Results are ranked by token frequency
-results = service.search(query="python tutorial", limit=10)
+results = service.full_text_search(query="python tutorial", limit=10)
 
 for bookmark in results:
     print(f"Found: {bookmark.title} ({bookmark.url})")
@@ -51,7 +51,7 @@ def search_bookmarks():
     limit = request.args.get("limit", 20, type=int)
     
     # Delegate to the service layer
-    results = _service.search(query, limit=limit)
+    results = _service.full_text_search(query, limit=limit)
     
     return jsonify({
         "results": [b.to_dict() for b in results], 

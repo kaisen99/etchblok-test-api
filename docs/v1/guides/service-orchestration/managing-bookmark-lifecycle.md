@@ -95,7 +95,7 @@ The `BookmarkService` maintains an in-memory `SearchIndex`. This index is update
 
 ```python
 # Perform a full-text search
-results = service.search(query="example", limit=10)
+results = service.full_text_search(query="example", limit=10)
 
 for result in results:
     print(f"Found: {result.title}")
