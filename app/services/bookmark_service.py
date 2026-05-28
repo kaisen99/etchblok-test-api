@@ -134,8 +134,8 @@ class BookmarkService:
         self._cache.invalidate(bookmark_id)
         return bookmark
 
-    def search(self, query: str, limit: int = 20) -> List[Bookmark]:
-        """Full-text search across bookmarks."""
+    def full_text_search(self, query: str, limit: int = 20) -> List[Bookmark]:
+        """Full-text search across bookmark titles and descriptions."""
         return self._search.search(query, limit=limit)
 
     # ── Tag operations ──────────────────────────────────────────────

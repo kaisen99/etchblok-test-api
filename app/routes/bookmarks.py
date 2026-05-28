@@ -83,7 +83,7 @@ def search_bookmarks():
     """
     query = request.args.get("q", "")
     limit = request.args.get("limit", 20, type=int)
-    results = _service.search(query, limit=limit)
+    results = _service.full_text_search(query, limit=limit)
     return jsonify({"results": [b.to_dict() for b in results], "count": len(results)})
 
 
