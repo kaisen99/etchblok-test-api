@@ -1,0 +1,1 @@
+[{"id": "guide", "name": "Guides", "slug": "guide", "kind": "system", "order": 0, "hidden": false}, {"id": "api_ref", "name": "API References", "slug": "api_ref", "kind": "system", "order": 1, "hidden": false}, {"id": "architecture", "name": "Architecture", "slug": "architecture", "kind": "system", "order": 2, "hidden": false}]
