@@ -5,7 +5,7 @@
 
 Rename or recolour a tag.
 
-Updates the properties of an existing tag, such as its name or color, based on the provided unique identifier.
+Updates the properties of an existing tag, such as its name or color, based on the provided identifier.
 
 ## Endpoint
 
@@ -23,7 +23,7 @@ PUT /api/tags/< tag_id >
 
 | Field | Type | Description |
 |-------|------|-------------|
-| **data** | `object` | A JSON object containing the updated fields for the tag, such as name or color. |
+| **data** | `object` | A JSON object containing the fields to update, typically including the new name or color for the tag. |
 
 ## Response
 
@@ -31,4 +31,4 @@ PUT /api/tags/< tag_id >
 |--------|-------------|
 | **200** | The tag was successfully updated. Returns `object`. |
 | **400** | The update failed due to invalid input data or a service error. Returns `object`. |
-| **404** | No tag was found matching the provided tag_id. Returns `object`. |
+| **404** | No tag was found with the specified identifier. Returns `object`. |

@@ -5,7 +5,7 @@
 
 Delete a tag and remove it from all bookmarks.
 
-Permanently deletes a specific tag and removes its association from all bookmarks.
+Deletes a specific tag by its unique identifier and removes its association from all bookmarks.
 
 ## Endpoint
 

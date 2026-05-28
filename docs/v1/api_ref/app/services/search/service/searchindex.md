@@ -9,8 +9,8 @@ Inverted index mapping tokens to bookmark IDs.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository used to fetch bookmark data during index rebuilding and search result retrieval. |
-| **_index** | `Dict[str, Set[str]]` | An inverted index mapping search tokens to sets of bookmark IDs for efficient lookup. |
+| **_repo** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository used to fetch bookmark details and rebuild the index. |
+| **_index** | `Dict[str, Set[str]]` | Inverted index mapping tokens to sets of bookmark IDs for efficient search retrieval. |
 
 ---
 
@@ -28,7 +28,7 @@ def SearchIndex(
 
 | Name | Type | Description |
 |------|------|-------------|
-| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository to index from. |
+| **repository** | `[BookmarkRepository](../../../db/repository/bookmarkrepository.md?sid=app_db_repository_bookmarkrepository)` | The bookmark repository instance used to populate and update the index. |
 
 ---
 
@@ -121,7 +121,7 @@ Search bookmarks matching the query string. Tokens are AND-ed together — all m
 | Name | Type | Description |
 |------|------|-------------|
 | **query** | `str` | Free-text search query containing the terms to match against indexed bookmarks. |
-| **limit** | `int` = 20 | Maximum number of results to return from the ranked search results. |
+| **limit** | `int` = 20 | Maximum number of results to return from the ranked list. |
 
 #### Returns
 

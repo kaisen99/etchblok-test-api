@@ -32,5 +32,5 @@ PUT /api/bookmarks/< bookmark_id >
 | Status | Description |
 |--------|-------------|
 | **200** | The bookmark was successfully updated. Returns `object`. |
-| **400** | The update failed due to validation errors or invalid input data. Returns `object`. |
-| **404** | No bookmark was found with the provided identifier. Returns `object`. |
+| **400** | The update failed due to invalid input data or a service error. Returns `object`. |
+| **404** | No bookmark was found matching the provided identifier. Returns `object`. |

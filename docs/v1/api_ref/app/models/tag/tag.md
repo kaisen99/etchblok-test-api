@@ -37,7 +37,7 @@ def Tag(
 |------|------|-------------|
 | **name** | `str` | The display name of the tag. |
 | **color** | `[TagColor](tagcolor.md?sid=app_models_tag_tagcolor)` = TagColor.GRAY | The visual color assigned to the tag. |
-| **description** | `str` = "" | An optional description of the tag. |
+| **description** | `str` = "" | An optional description of the tag's purpose. |
 | **id** | `str` = uuid.uuid4().hex[:8] | A unique identifier for the tag. |
 | **usage_count** | `int` = 0 | The initial number of bookmarks using this tag. |
 
@@ -146,6 +146,6 @@ Construct a Tag from a dictionary.
 
 | Type | Description |
 |------|-------------|
-| `[Tag](tag.md?sid=app_models_tag_tag)` | A new instance of the Tag class populated with data from the provided dictionary |
+| `[Tag](tag.md?sid=app_models_tag_tag)` | A new Tag instance populated with the provided dictionary data |
 
 ---

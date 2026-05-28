@@ -9,29 +9,11 @@ Preset colours available for tags.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **RED** | `string` = "red" | Preset color option representing a red visual style for tags. |
-| **BLUE** | `string` = "blue" | Preset color option representing a blue visual style for tags. |
-| **GREEN** | `string` = "green" | Preset color option representing a green visual style for tags. |
-| **YELLOW** | `string` = "yellow" | Preset color option representing a yellow visual style for tags. |
-| **PURPLE** | `string` = "purple" | Preset color option representing a purple visual style for tags. |
-| **GRAY** | `string` = "gray" | Preset color option representing a gray visual style for tags. |
-
----
-
-## Constructor
-
-### Signature
-
-```python
-def TagColor(
-    value: string
-) - > null
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| **value** | `string` | The string representation of the color preset to be assigned to the enum member |
+| **RED** | `string` = red | Represents the red color preset for tag styling. |
+| **BLUE** | `string` = blue | Represents the blue color preset for tag styling. |
+| **GREEN** | `string` = green | Represents the green color preset for tag styling. |
+| **YELLOW** | `string` = yellow | Represents the yellow color preset for tag styling. |
+| **PURPLE** | `string` = purple | Represents the purple color preset for tag styling. |
+| **GRAY** | `string` = gray | Represents the gray color preset for tag styling. |
 
 ---

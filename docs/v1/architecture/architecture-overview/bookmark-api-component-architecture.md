@@ -1,77 +1,70 @@
 ---
-{title: Bookmark API Component Architecture, description: 'The component architecture of the Bookmark API follows a classic layered pattern, with a clear separation between the web interface, business logic, and data...', displayed_sidebar: architectureSidebar, section_type: architecture}
+{title: Bookmark API Component Architecture, description: 'The Bookmark API follows a classic layered architecture designed for a RESTful service. At the top, the layer handles incoming HTTP requests via Flask...', displayed_sidebar: architectureSidebar, section_type: architecture}
 ---
 # Bookmark API Component Architecture
 
-The component architecture of the Bookmark API follows a classic layered pattern, with a clear separation between the web interface, business logic, and data persistence.
+The Bookmark API follows a classic layered architecture designed for a RESTful service. 
 
-At the top level, the API Layer consists of Flask Blueprints that handle HTTP requests and responses. These routes do not contain business logic; instead, they delegate all operations to the [Architecture: The Bookmark Service Facade](/guides/bookmark-operations/architecture-the-bookmark-service-facade).
+At the top, the app.routes layer handles incoming HTTP requests via Flask Blueprints, delegating business logic to the service layer. 
 
-The [Architecture: The Bookmark Service Facade](/guides/bookmark-operations/architecture-the-bookmark-service-facade) is centered around the `BookmarkService`, which acts as a singleton facade. It orchestrates three main sub-components:
-1.  **Search Service**: An in-memory inverted index that provides full-text search capabilities.
-2.  **Cache Service**: An internal LRU cache used to optimize frequent lookups of individual bookmarks.
-3.  **Bookmark Repository**: The data access layer that abstracts the underlying storage.
+The core of the application is the [app.services.bookmark_service](/api_ref/app/bookmark_service), which acts as a singleton orchestrator. It manages the lifecycle of bookmarks, tags, and collections by coordinating between the [app.db.repository](/api_ref/app/repository) for persistence, the [app.services.search_service](/api_ref/app/search_service) for full-text search capabilities, and an internal LRU cache for performance.
 
-The [Persistence Layer](/guides/persistence-layer) currently implements an in-memory repository, which manages the lifecycle of the [Domain Models](/guides/domain-models) (Bookmarks, Tags, and Collections). This design allows for easy replacement with a persistent database (like PostgreSQL or SQLite) without modifying the service or route logic.
+The [app.services.search_service](/api_ref/app/search_service) maintains an in-memory inverted index, which it builds and updates by interacting directly with the repository. 
 
-Key architectural decisions discovered:
-- **Singleton Service**: `BookmarkService` ensures a single point of truth for state management across different route modules.
-- **Internal Caching**: The cache is encapsulated within the service layer, ensuring that invalidation happens automatically during write operations.
-- **In-memory Search**: The search index is rebuilt from the repository on startup and updated incrementally, providing fast search without external dependencies.
+The [app.db.repository](/api_ref/app/repository) implements the repository pattern, abstracting the underlying in-memory storage (dictionaries) from the rest of the application. 
+
+All layers share and operate on the [app.models](/api_ref/app/models), which define the core domain entities like Bookmarks, Tags, and Collections. This separation of concerns ensures that the API logic, business rules, and data access patterns remain decoupled and maintainable.
 
 **Key Architectural Findings:**
-- The application implements a strict layered architecture: Routes -> Services -> Repository.
-- BookmarkService is a singleton facade that orchestrates business logic, validation, and cross-component coordination.
-- SearchIndex provides full-text search by maintaining an inverted index of bookmark titles and descriptions.
-- LRUCache is used internally by the service layer to minimize repository hits for single-entity lookups.
-- The BookmarkRepository provides a clean abstraction for data access, currently backed by in-memory dictionaries.
+- Layered Architecture: Implements a clear separation between API routes, business services, and data repositories.
+- Service Orchestration: The BookmarkService acts as a central facade and singleton, managing cross-cutting concerns like caching and search indexing.
+- In-memory Search: A custom inverted index in the search_service provides full-text search without an external database dependency.
+- Repository Pattern: The repository layer abstracts in-memory storage, allowing for future migration to a persistent database with minimal service-layer changes.
+- Domain-Driven Models: Core entities (Bookmark, Tag, Collection) are defined as dataclasses and used as the primary data exchange format across all layers.
 
 ```mermaid
 flowchart TB
-    subgraph API_Layer [API Layer: Flask Blueprints]
-        direction TB
-        BR["<b>Bookmarks Route</b><br/>app.routes.bookmarks"]
-        TR["<b>Tags Route</b><br/>app.routes.tags"]
-        CR["<b>Collections Route</b><br/>app.routes.collections"]
+    subgraph Client
+        User[/End User/]
     end
 
-    subgraph Service_Layer [Service Layer: Business Logic]
-        direction TB
-        BS[["<b>Bookmark Service</b><br/>app.services.bookmark_service"]]
-        SS[["<b>Search Service</b><br/>app.services.search_service"]]
-        CS[["<b>Cache Service</b><br/>app.services._cache"]]
+    subgraph Flask_App [Flask Application]
+        subgraph Routes [API Layer]
+            app_routes[app.routes]
+        end
+
+        subgraph Services [Service Layer]
+            app_services_bookmark_service[["app.services.bookmark_service"]]
+            app_services_search_service[["app.services.search_service"]]
+            app_services_cache[["app.services._cache"]]
+        end
+
+        subgraph DAL [Data Access Layer]
+            app_db_repository[app.db.repository]
+        end
+
+        subgraph Models [Domain Models]
+            app_models[app.models]
+        end
     end
 
-    subgraph Data_Layer [Data Access Layer]
-        REPO[("<b>Bookmark Repository</b><br/>app.db.repository")]
+    subgraph Storage [In-Memory Storage]
+        DB[(In-memory Dicts)]
     end
 
-    subgraph Models [Domain Models]
-        BM["<b>Bookmark</b><br/>app.models.bookmark"]
-        TAG["<b>Tag</b><br/>app.models.tag"]
-        COLL["<b>Collection</b><br/>app.models.collection"]
-    end
-
-    %% API to Service connections
-    BR -- "delegates to" --> BS
-    TR -- "delegates to" --> BS
-    CR -- "delegates to" --> BS
-
-    %% Service internal orchestration
-    BS -- "orchestrates" --> REPO
-    BS -- "updates index" --> SS
-    BS -- "manages" --> CS
+    User -- "REST API Calls" --> app_routes
     
-    %% Search to Repo connection
-    SS -- "queries" --> REPO
-    
-    %% Data to Models
-    REPO -- "persists" --> BM
-    REPO -- "persists" --> TAG
-    REPO -- "persists" --> COLL
-    
-    %% Service to Models (Validation/Creation)
-    BS -. "validates & creates" .-> BM
-    BS -. "validates & creates" .-> TAG
-    BS -. "validates & creates" .-> COLL
+    app_routes -- "delegates to" --> app_services_bookmark_service
+
+    app_services_bookmark_service -- "orchestrates" --> app_db_repository
+    app_services_bookmark_service -- "updates/queries" --> app_services_search_service
+    app_services_bookmark_service -- "manages" --> app_services_cache
+
+    app_services_search_service -- "indexes/fetches" --> app_db_repository
+
+    app_db_repository -- "persists to" --> DB
+
+    app_routes -. "uses" .-> app_models
+    app_services_bookmark_service -. "uses" .-> app_models
+    app_db_repository -. "uses" .-> app_models
 ```

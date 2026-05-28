@@ -5,7 +5,7 @@
 
 Get a collection and its bookmarks.
 
-Retrieves the details of a specific collection along with its associated bookmarks.
+Retrieves the details of a specific collection along with its associated bookmarks using the collection's unique identifier.
 
 ## Endpoint
 

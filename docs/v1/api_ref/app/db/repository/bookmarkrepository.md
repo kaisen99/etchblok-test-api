@@ -9,9 +9,9 @@ In-memory storage for bookmarks, tags, and collections.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal dictionary mapping unique bookmark IDs to Bookmark objects for in-memory persistence. |
-| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal dictionary mapping unique tag IDs to Tag objects for in-memory persistence. |
-| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal dictionary mapping unique collection IDs to Collection objects for in-memory persistence. |
+| **_bookmarks** | `Dict[str, [Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` = \{\} | Internal mapping of unique bookmark IDs to their respective Bookmark objects for persistent in-memory storage. |
+| **_tags** | `Dict[str, [Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` = \{\} | Internal mapping of unique tag IDs to Tag objects used to manage and retrieve bookmark categorization data. |
+| **_collections** | `Dict[str, [Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` = \{\} | Internal mapping of unique collection IDs to Collection objects for organizing bookmarks into grouped structures. |
 
 ---
 
@@ -60,7 +60,7 @@ Insert or update a bookmark.
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `None` | Nothing |
 
 ---
 
@@ -85,7 +85,7 @@ Retrieve a bookmark by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The Bookmark object matching the ID, or None if no such bookmark exists |
+| `Optional[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The Bookmark object if found, otherwise None |
 
 ---
 
@@ -104,7 +104,7 @@ Hard-delete a bookmark. Returns True if it existed.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to be permanently deleted |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be permanently removed |
 
 #### Returns
 
@@ -132,14 +132,14 @@ Return a paginated slice of bookmarks.
 | Name | Type | Description |
 |------|------|-------------|
 | **page** | `int` = 1 | The 1-based page index for pagination |
-| **per_page** | `int` = 25 | The maximum number of items to return in a single page |
+| **per_page** | `int` = 25 | The maximum number of bookmark items to return per page |
 | **status** | `Optional[str]` = None | An optional filter to restrict results by status, such as 'active', 'archived', or 'trashed' |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], int]` | A tuple containing the list of bookmarks for the current page and the total count of bookmarks matching the filter |
+| `Tuple[List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], int]` | A tuple containing the list of bookmarks for the current page and the total count of matching bookmarks |
 
 ---
 
@@ -164,7 +164,7 @@ Return all bookmarks that have a specific tag attached.
 
 | Type | Description |
 |------|-------------|
-| `List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | A list of Bookmark objects that are associated with the specified tag ID |
+| `List[[Bookmark](../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | A list of Bookmark objects associated with the specified tag ID |
 
 ---
 
@@ -189,7 +189,7 @@ Insert or update a tag.
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `None` | Nothing |
 
 ---
 
@@ -214,7 +214,7 @@ Retrieve a tag by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | The Tag object matching the ID, or None if no such tag exists |
+| `Optional[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | The Tag object if found, otherwise None |
 
 ---
 
@@ -233,7 +233,7 @@ Hard-delete a tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to be permanently deleted |
+| **tag_id** | `str` | The unique identifier of the tag to be permanently removed |
 
 #### Returns
 
@@ -256,7 +256,7 @@ Return all tags.
 
 | Type | Description |
 |------|-------------|
-| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list containing all Tag objects stored in the repository |
+| `List[[Tag](../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all Tag objects stored in the repository |
 
 ---
 
@@ -281,7 +281,7 @@ Insert or update a collection.
 
 | Type | Description |
 |------|-------------|
-| `None` |  |
+| `None` | Nothing |
 
 ---
 
@@ -306,7 +306,7 @@ Retrieve a collection by ID, or None.
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | The Collection object matching the ID, or None if no such collection exists |
+| `Optional[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | The Collection object if found, otherwise None |
 
 ---
 
@@ -325,7 +325,7 @@ Hard-delete a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the collection to be permanently deleted |
+| **collection_id** | `str` | The unique identifier of the collection to be permanently removed |
 
 #### Returns
 
@@ -348,6 +348,6 @@ Return all collections.
 
 | Type | Description |
 |------|-------------|
-| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list containing all Collection objects stored in the repository |
+| `List[[Collection](../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all Collection objects stored in the repository |
 
 ---

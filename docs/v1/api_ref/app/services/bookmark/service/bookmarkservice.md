@@ -54,13 +54,13 @@ Retrieve a bookmark by ID, using cache when available.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to retrieve. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to retrieve |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The requested Bookmark object if found, otherwise None. |
+| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The requested bookmark object if found, otherwise None |
 
 ---
 
@@ -71,7 +71,7 @@ Retrieve a bookmark by ID, using cache when available.
 def list_bookmarks(
     page: int = 1,
     per_page: int = 25,
-    status: Optional[str] = None
+    status: Optional[str] = null
 ) - > Tuple[List[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], int]
 ```
 
@@ -83,7 +83,7 @@ Return a paginated list of bookmarks.
 |------|------|-------------|
 | **page** | `int` = 1 | 1-based page number. |
 | **per_page** | `int` = 25 | Number of items per page. |
-| **status** | `Optional[str]` = None | Optional status filter. |
+| **status** | `Optional[str]` = null | Optional status filter. |
 
 #### Returns
 
@@ -109,14 +109,14 @@ Partially update a bookmark.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to update. |
-| **data** | `Dict[str, Any]` | A dictionary containing the fields to update, such as title, description, or url. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to modify |
+| **data** | `Dict[str, Any]` | Dictionary containing the fields to update, such as title, description, or url |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], Optional[str]]` | The updated Bookmark and None if successful, or None and an error message if validation fails. |
+| `Tuple[Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)], Optional[str]]` | The updated bookmark and None if successful, or None and an error message if validation fails |
 
 ---
 
@@ -135,13 +135,13 @@ Soft-delete by trashing the bookmark.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to soft-delete. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to be soft-deleted |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the bookmark was successfully trashed, False if it was not found. |
+| `bool` | True if the bookmark was successfully trashed, False if the bookmark was not found |
 
 ---
 
@@ -160,13 +160,13 @@ Archive a bookmark.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to archive. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to archive |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The archived Bookmark object, or None if the bookmark was not found. |
+| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The archived bookmark object, or None if the bookmark was not found |
 
 ---
 
@@ -185,13 +185,13 @@ Restore a bookmark to active status.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `str` | The unique identifier of the bookmark to restore. |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to restore |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The restored Bookmark object, or None if the bookmark was not found. |
+| `Optional[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | The restored bookmark object, or None if the bookmark was not found |
 
 ---
 
@@ -211,14 +211,14 @@ Full-text search across bookmarks.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **query** | `str` | The search string used to match bookmark content. |
-| **limit** | `int` = 20 | The maximum number of search results to return. |
+| **query** | `str` | The search string used to match bookmark content |
+| **limit** | `int` = 20 | The maximum number of search results to return |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `List[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | A list of Bookmark objects matching the search query. |
+| `List[[Bookmark](../../../models/bookmark/bookmark.md?sid=app_models_bookmark_bookmark)]` | A list of bookmarks matching the search query |
 
 ---
 
@@ -235,7 +235,7 @@ Return all tags.
 
 | Type | Description |
 |------|-------------|
-| `List[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all available Tag objects. |
+| `List[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)]` | A list of all available tag objects |
 
 ---
 
@@ -254,13 +254,13 @@ Validate and persist a new tag.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **data** | `Dict[str, Any]` | A dictionary containing tag attributes, primarily the 'name'. |
+| **data** | `Dict[str, Any]` | Dictionary containing tag attributes, primarily the name |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[Optional[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)], Optional[str]]` | The created Tag and None if successful, or None and an error message if validation fails. |
+| `Tuple[Optional[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)], Optional[str]]` | A tuple containing the created tag and None, or None and an error message if validation fails |
 
 ---
 
@@ -279,13 +279,13 @@ Delete a tag and strip it from all bookmarks.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to remove. |
+| **tag_id** | `str` | The unique identifier of the tag to remove |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the tag was found and deleted, False otherwise. |
+| `bool` | True if the tag was found and deleted, False otherwise |
 
 ---
 
@@ -305,14 +305,14 @@ Update a tag's name or colour.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **tag_id** | `str` | The unique identifier of the tag to update. |
-| **data** | `Dict[str, Any]` | A dictionary containing the 'name' or 'color' to be updated. |
+| **tag_id** | `str` | The unique identifier of the tag to update |
+| **data** | `Dict[str, Any]` | Dictionary containing the new name or color values for the tag |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[Optional[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)], Optional[str]]` | The updated Tag and None if successful, or None and an error message if validation fails. |
+| `Tuple[Optional[[Tag](../../../models/tag/tag.md?sid=app_models_tag_tag)], Optional[str]]` | A tuple containing the updated tag and None, or None and an error message if validation fails |
 
 ---
 
@@ -329,7 +329,7 @@ Return all collections.
 
 | Type | Description |
 |------|-------------|
-| `List[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all available Collection objects. |
+| `List[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)]` | A list of all existing collection objects |
 
 ---
 
@@ -348,13 +348,13 @@ Retrieve a collection by ID.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the collection to retrieve. |
+| **collection_id** | `str` | The unique identifier of the collection to retrieve |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Optional[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)]` | The requested Collection object if found, otherwise None. |
+| `Optional[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)]` | The collection object if found, otherwise None |
 
 ---
 
@@ -373,13 +373,13 @@ Create a new collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **data** | `Dict[str, Any]` | A dictionary containing collection attributes, including the required 'name'. |
+| **data** | `Dict[str, Any]` | Dictionary containing collection attributes, including the required name |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `Tuple[Optional[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)], Optional[str]]` | The created Collection and None if successful, or None and an error message if the name is missing. |
+| `Tuple[Optional[[Collection](../../../models/collection/collection.md?sid=app_models_collection_collection)], Optional[str]]` | A tuple containing the new collection and None, or None and an error message if the name is missing |
 
 ---
 
@@ -399,14 +399,14 @@ Add a bookmark to a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the target collection. |
-| **bookmark_id** | `str` | The unique identifier of the bookmark to add. |
+| **collection_id** | `str` | The unique identifier of the target collection |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to add |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the bookmark was successfully added to the collection, False otherwise. |
+| `bool` | True if the bookmark was successfully added to the collection, False if the collection was not found or addition failed |
 
 ---
 
@@ -426,13 +426,13 @@ Remove a bookmark from a collection.
 
 | Name | Type | Description |
 |------|------|-------------|
-| **collection_id** | `str` | The unique identifier of the target collection. |
-| **bookmark_id** | `str` | The unique identifier of the bookmark to remove. |
+| **collection_id** | `str` | The unique identifier of the collection containing the bookmark |
+| **bookmark_id** | `str` | The unique identifier of the bookmark to remove |
 
 #### Returns
 
 | Type | Description |
 |------|-------------|
-| `bool` | True if the bookmark was successfully removed from the collection, False otherwise. |
+| `bool` | True if the bookmark was successfully removed, False if the collection was not found or removal failed |
 
 ---

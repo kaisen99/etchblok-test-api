@@ -1,103 +1,116 @@
 ---
 section_type: guide
 ---
-Pagemark API is a lightweight, developer-friendly REST API for managing bookmarks. Built with Flask, it provides a structured way to save URLs, organize them with tags and collections, and find them instantly using a built-in full-text search engine.
+Pagemark API is a lightweight, developer-friendly bookmark management service built with Flask. It provides a robust REST interface for saving, organizing, and searching URLs with metadata, tagging, and collection support.
 
 ## The Problem
-Managing a growing list of links often leads to "bookmark rot"—where URLs are saved but never found again. Pagemark API solves this by providing a clean, layered backend that treats bookmarks as first-class entities with metadata, lifecycle states (active/archived/trashed), and powerful searchability, making it an ideal foundation for personal link-saving tools or browser extensions.
+Managing bookmarks across different browsers and devices often leads to fragmented data and poor searchability. Pagemark API solves this by providing a centralized, programmable backend for bookmark storage. It is designed for developers who want to build their own bookmarking tools, browser extensions, or internal knowledge bases without worrying about the underlying storage and search logic.
 
 ## Core Concepts
 
-*   **Bookmarks**: The primary entity. Each bookmark tracks a URL, title, description, and its current [Bookmark Lifecycle States](/architecture/architecture-overview/bookmark-lifecycle-states).
-*   **Tags**: Flexible, flat labels (e.g., "work", "recipe", "python") that can be attached to any number of bookmarks for cross-cutting organization.
-*   **Collections**: Named groups of bookmarks. They can be **Manual** (you explicitly add bookmarks) or **Smart** (defined by a filter rule, though currently these act as containers).
-*   **Lifecycle Status**: Bookmarks move through states: `active` (visible), `archived` (hidden from main lists), and `trashed` (soft-deleted).
-*   **In-Memory Storage**: By default, the API uses a volatile in-memory repository, making it extremely fast and easy to reset during development.
+*   **Bookmark**: The primary entity representing a saved URL. It includes a title, description, status (Active, Archived, or Trashed), and custom metadata.
+*   **Tag**: A flexible, flat labeling system. Tags can be shared across bookmarks and have customizable colors.
+*   **Collection**: A hierarchical grouping mechanism (though currently implemented as flat named groups) to organize bookmarks into logical sets like "Work," "Reading List," or "Project X."
+*   **Search Index**: An in-memory inverted index that provides full-text search capabilities across bookmark titles and descriptions.
+*   **Status Lifecycle**: Bookmarks follow a simple lifecycle: they start as `ACTIVE`, can be moved to `ARCHIVED` for long-term storage, or `TRASHED` for soft-deletion.
 
 ## How It Works
-The application follows a classic layered architecture designed for testability and separation of concerns:
 
-1.  **Routes (Blueprints)**: Flask blueprints in `app/routes/` handle HTTP parsing and response serialization.
-2.  **Service Layer**: The `BookmarkService` (a singleton) acts as the central brain, orchestrating validation, search indexing, and cache management.
-3.  **Repository**: The `BookmarkRepository` abstracts data access. While currently in-memory, it is designed to be swapped for a persistent database like SQLite or PostgreSQL.
-4.  **Search Index**: An internal `SearchIndex` maintains an inverted index of tokens from titles and descriptions to provide fast full-text search without external dependencies like Elasticsearch.
-5.  **Caching**: An `LRUCache` sits in front of the repository to speed up retrieval of frequently accessed bookmarks.
+The application follows a clean, layered architecture to ensure separation of concerns:
+
+1.  **Routes Layer**: Flask Blueprints (e.g., `bookmarks_bp`) handle HTTP request parsing and response formatting.
+2.  **Service Layer**: The `BookmarkService` (a singleton) acts as the central orchestrator. It handles business logic, validation, and coordinates between the repository, cache, and search index.
+3.  **Repository Layer**: The `BookmarkRepository` abstracts data access. In its current form, it provides in-memory storage, making it extremely fast for development and testing.
+4.  **Search & Cache**: As bookmarks are created or updated, the `SearchIndex` incrementally updates its inverted index, and the `LRUCache` ensures frequently accessed bookmarks are served with minimal latency.
 
 ## Use Cases
 
 ### Creating a Bookmark
-Save a new URL with a title and optional description.
+You can programmatically save a new bookmark by interacting with the `BookmarkService`.
 
 ```python
-import requests
+from app.services.bookmark_service import BookmarkService
 
-payload = {
-    "url": "https://flask.palletsprojects.com/",
-    "title": "Flask Documentation",
-    "description": "The official docs for the Flask web framework."
-}
-response = requests.post("http://localhost:5000/api/bookmarks/", json=payload)
-print(response.json())
+service = BookmarkService()
+bookmark, error = service.create_bookmark({
+    "url": "https://github.com",
+    "title": "GitHub",
+    "description": "Where the world builds software",
+    "tags": ["dev", "git"]
+})
+
+if not error:
+    print(f"Saved: {bookmark.id}")
 ```
 
-### Searching Your Links
-Find bookmarks using the built-in full-text search engine.
-
-```bash
-# Search for "flask" in titles and descriptions
-curl "http://localhost:5000/api/bookmarks/search?q=flask"
-```
-
-### Organizing with Tags
-Create tags and associate them with your bookmarks.
+### Searching Bookmarks
+The API provides a simple full-text search that AND-s tokens together for precise results.
 
 ```python
-# Create a tag
-tag_data = {"name": "development", "color": "blue"}
-requests.post("http://localhost:5000/api/tags/", json=tag_data)
+from app.services.bookmark_service import BookmarkService
 
-# Tags are then referenced by their ID in bookmark updates
+service = BookmarkService()
+results = service.search("software development")
+
+for b in results:
+    print(f"Found: {b.title} ({b.url})")
 ```
 
-## When to Use
-*   **Prototyping**: Perfect for building a frontend for a bookmarking app without worrying about DB setup.
-*   **Internal Tools**: Use it as a backend for a team-wide "useful links" dashboard.
-*   **Learning**: An excellent reference for implementing a clean, layered architecture in Flask with services and repositories.
+### Organizing with Collections
+Group related bookmarks into named collections for better discoverability.
 
-## When Not to Use
-*   **Persistent Storage**: Since it is in-memory, all data is lost when the server restarts.
-*   **Multi-user Environments**: There is no built-in authentication or user isolation.
-*   **Large Datasets**: The in-memory search and storage are optimized for thousands, not millions, of records.
+```python
+from app.services.bookmark_service import BookmarkService
+
+service = BookmarkService()
+# Create a collection
+collection, _ = service.create_collection({"name": "Research Papers"})
+
+# Add a bookmark to it
+service.add_to_collection(collection.id, "some-bookmark-id")
+```
+
+## When to Use / When Not to Use
+
+**Use Pagemark API when:**
+*   You are building a personal bookmarking tool or a small-team knowledge base.
+*   You need a lightweight, easy-to-deploy REST API for URL management.
+*   You want a "batteries-included" backend with search and tagging out of the box.
+
+**Look elsewhere if:**
+*   You require persistent storage across restarts (the current repository is in-memory).
+*   You need advanced multi-user permissions or OAuth2 authentication (this is a flat API).
+*   You are managing millions of bookmarks (the in-memory search index is optimized for thousands, not millions).
 
 ## Stack Compatibility
-*   **Language**: Python 3.10+
+*   **Language**: Python 3.8+
 *   **Framework**: Flask 3.0+
-*   **Dependencies**: `python-dotenv` for configuration management.
-*   **Storage**: Volatile In-Memory (Default).
+*   **Dependencies**: `python-dotenv` for configuration.
+*   **Storage**: In-memory (pluggable via `BookmarkRepository`).
 
 ## Getting Started Pointers
-*   Explore the [Bookmark API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture) for a full list of available operations.
-*   Check `app/config.py` to adjust server settings.
-*   See `app/models/bookmark.py` to understand the data structure.
+*   Explore the [API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture) for a full list of available REST actions.
+*   Check the [Bookmark Model](/api_ref/app/models/bookmark/bookmark) to understand the data structure and metadata capabilities.
+*   See the [SearchIndex](/api_ref/app/services/search/service/searchindex) implementation to learn how the full-text search is handled.
 
 ## Limitations & Assumptions
-*   **Volatile Data**: Data does not persist across restarts.
-*   **Smart Collections**: The `filter_rule` logic is defined in the model but is not automatically applied by the current API endpoints; bookmarks must still be added manually.
-*   **No Auth**: The API is completely open; it assumes it is running in a trusted environment or behind a proxy.
+*   **Volatility**: Data is stored in memory and will be lost when the server restarts.
+*   **Single Tenant**: The API assumes a single-user or shared-environment model; there is no built-in user isolation.
+*   **Validation**: URL validation is basic (checks for `http/https` prefixes).
 
 ## FAQ
 
 **How do I persist my data?**
-Currently, the `BookmarkRepository` uses Python dictionaries. To persist data, you would need to implement a new repository class (e.g., `SQLiteBookmarkRepository`) that follows the same interface.
+Currently, the `BookmarkRepository` uses in-memory dictionaries. To persist data, you would need to implement a new repository class (e.g., `SQLiteRepository`) that follows the same interface.
+
+**Does it support nested tags?**
+No, tags are currently a flat list of strings associated with each bookmark.
 
 **Can I search by tag?**
-The search endpoint currently focuses on full-text search of titles and descriptions. To filter by tag, you can use the `list_bookmarks` endpoint with custom logic or retrieve bookmarks directly via the repository's `get_bookmarks_with_tag` method.
+While there isn't a dedicated search endpoint for tags, you can list bookmarks and filter them, or use the `get_bookmarks_with_tag` method in the repository/service layer.
 
-**What happens when I delete a bookmark?**
-The `DELETE /api/bookmarks/<id>` endpoint performs a "soft delete" by moving the bookmark to the `trashed` status. It is not removed from the memory until the server restarts.
+**Is there a frontend included?**
+No, Pagemark API is a headless REST API. It is designed to be consumed by browser extensions, mobile apps, or web frontends.
 
-**Is there a limit to how many bookmarks I can save?**
-Only the limits of your system's RAM. The `LRUCache` is capped at 256 items by default, but the repository itself is unbounded.
-
-**How does the search ranking work?**
-The `SearchIndex` ranks results based on the frequency of query tokens appearing in the bookmark's title and description. It uses a simple "hit count" relevance score.
+**How does the caching work?**
+It uses a simple LRU (Least Recently Used) cache in the service layer to store the most recently accessed `Bookmark` objects, reducing repository lookups.

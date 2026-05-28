@@ -20,11 +20,11 @@ POST /api/bookmarks/
 | Field | Type | Description |
 |-------|------|-------------|
 | **url** | `string` | The full URL of the website to be bookmarked. |
-| **title** | `string` | The display title or name assigned to the bookmark. |
+| **title** | `string` | The descriptive title assigned to the bookmark. |
 
 ## Response
 
 | Status | Description |
 |--------|-------------|
 | **201** | The bookmark was successfully created. Returns `object`. |
-| **400** | The request was invalid, likely due to missing required fields or a malformed URL. Returns `object`. |
+| **400** | The request was invalid or the bookmark could not be created due to provided data errors. Returns `object`. |

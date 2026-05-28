@@ -9,90 +9,78 @@ This section contains architecture diagrams and documentation for **etchblok-tes
 
 ### [Bookmark Management System Context](/architecture/architecture-overview/bookmark-management-system-context)
 
-This system context diagram depicts the **Bookmark Management System** (Bookmark API) and its interactions with external actors and dependencies. 
+The Bookmark Management System is a backend web service that provides a REST API for managing bookmarks, tags, and collections. 
 
-The central component is the **Bookmark API**, a Flask-based RESTful service that provides endpoints for managing bookmarks, tags, and collections. 
+- **User**: Represents the end users or client applications that interact with the [Bookmark API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture) via HTTP/REST endpoints to perform CRUD operations on bookmarks and organize them into tags and collections.
+- **Bookmark API**: The core system built with the Flask framework. It orchestrates business logic through a layered architecture consisting of routes, services, and repositories.
+- **Database**: A persistent storage layer (configured for PostgreSQL) where bookmarks, tags, and collections are stored. While the current implementation uses an in-memory repository, the architecture is designed to integrate with a relational database.
+- **Search Service**: Provides full-text search capabilities. It currently uses an internal inverted index to allow users to search through bookmark titles and descriptions, but is designed to be replaced by external services like Elasticsearch or Typesense.
+- **Cache Service**: An LRU (Least Recently Used) cache that stores frequently accessed bookmarks in memory to reduce database load and improve response times.
 
-- **User**: Represents the end-users who interact with the system via the REST API to perform CRUD operations on their bookmarks.
-- **Database**: A PostgreSQL database (as indicated by the internal connection configuration) used for persistent storage of domain entities like bookmarks, tags, and collections.
-- **External Search Service**: A full-text search engine (such as Elasticsearch or Typesense) that the API uses to index bookmark content and provide advanced search capabilities. While currently implemented as an in-memory index, the architecture is designed for external integration.
-- **Cache Service**: A caching layer (like Redis) used to store frequently accessed bookmark data to reduce database load and improve response times. The codebase includes an LRU cache implementation as a placeholder for this service.
-
-The diagram shows the flow of data and requests between these components, highlighting the system's role as an orchestrator between user requests and backend storage/search services.
+The system follows a clean separation of concerns, where the [BookmarkService](/api_ref/app/services/bookmark/service/bookmarkservice) acts as a facade, coordinating between the repository, search index, and cache.
 
 **Key Architectural Findings:**
-- The Bookmark API is a Flask-based service providing RESTful endpoints for bookmark management.
-- Data persistence is architected for a PostgreSQL database, with connection settings pointing to port 5432.
-- Full-text search is decoupled into a dedicated service, with the codebase providing an in-memory implementation that is production-ready for Elasticsearch or Typesense.
-- A caching layer (LRU cache) is integrated into the service layer to optimize bookmark retrieval.
-- The system follows a layered architecture (Routes -> Services -> Repository/Search/Cache) to maintain separation of concerns.
+- The system is a Flask-based REST API with a layered architecture (Routes -> Services -> Repositories).
+- Persistence is handled by a repository layer, with configuration present for a PostgreSQL database.
+- A dedicated SearchIndex service provides full-text search using an inverted index.
+- An internal LRUCache is used by the service layer to optimize bookmark retrieval.
+- The API exposes endpoints for bookmarks, tags, and collections, including search and health check capabilities.
 
 ### [Bookmark API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture)
 
-The component architecture of the Bookmark API follows a classic layered pattern, with a clear separation between the web interface, business logic, and data persistence.
+The Bookmark API follows a classic layered architecture designed for a RESTful service. 
 
-At the top level, the [Bookmark API Component Architecture](/architecture/architecture-overview/bookmark-api-component-architecture) consists of Flask Blueprints that handle HTTP requests and responses. These routes do not contain business logic; instead, they delegate all operations to the [Bookmark Service API Reference](/api_ref/app/bookmark_service).
+At the top, the app.routes layer handles incoming HTTP requests via Flask Blueprints, delegating business logic to the service layer. 
 
-The [Bookmark Service API Reference](/api_ref/app/bookmark_service) is centered around the `BookmarkService`, which acts as a singleton facade. It orchestrates three main sub-components:
-1.  **Search Service**: An in-memory inverted index that provides full-text search capabilities.
-2.  **Cache Service**: An internal LRU cache used to optimize frequent lookups of individual bookmarks.
-3.  **Bookmark Repository**: The data access layer that abstracts the underlying storage.
+The core of the application is the [app.services.bookmark_service](/api_ref/app/bookmark_service), which acts as a singleton orchestrator. It manages the lifecycle of bookmarks, tags, and collections by coordinating between the [app.db.repository](/api_ref/app/repository) for persistence, the [app.services.search_service](/api_ref/app/search_service) for full-text search capabilities, and an internal LRU cache for performance.
 
-The [Persistence Layer](/guides/persistence-layer) currently implements an in-memory repository, which manages the lifecycle of the [Domain Models Guide](/guides/domain-models) (Bookmarks, Tags, and Collections). This design allows for easy replacement with a persistent database (like PostgreSQL or SQLite) without modifying the service or route logic.
+The [app.services.search_service](/api_ref/app/search_service) maintains an in-memory inverted index, which it builds and updates by interacting directly with the repository. 
 
-Key architectural decisions discovered:
-- **Singleton Service**: `BookmarkService` ensures a single point of truth for state management across different route modules.
-- **Internal Caching**: The cache is encapsulated within the service layer, ensuring that invalidation happens automatically during write operations.
-- **In-memory Search**: The search index is rebuilt from the repository on startup and updated incrementally, providing fast search without external dependencies.
+The [app.db.repository](/api_ref/app/repository) implements the repository pattern, abstracting the underlying in-memory storage (dictionaries) from the rest of the application. 
+
+All layers share and operate on the [app.models](/api_ref/app/models), which define the core domain entities like Bookmarks, Tags, and Collections. This separation of concerns ensures that the API logic, business rules, and data access patterns remain decoupled and maintainable.
 
 **Key Architectural Findings:**
-- The application implements a strict layered architecture: Routes -> Services -> Repository.
-- BookmarkService is a singleton facade that orchestrates business logic, validation, and cross-component coordination.
-- SearchIndex provides full-text search by maintaining an inverted index of bookmark titles and descriptions.
-- LRUCache is used internally by the service layer to minimize repository hits for single-entity lookups.
-- The BookmarkRepository provides a clean abstraction for data access, currently backed by in-memory dictionaries.
+- Layered Architecture: Implements a clear separation between API routes, business services, and data repositories.
+- Service Orchestration: The BookmarkService acts as a central facade and singleton, managing cross-cutting concerns like caching and search indexing.
+- In-memory Search: A custom inverted index in the search_service provides full-text search without an external database dependency.
+- Repository Pattern: The repository layer abstracts in-memory storage, allowing for future migration to a persistent database with minimal service-layer changes.
+- Domain-Driven Models: Core entities (Bookmark, Tag, Collection) are defined as dataclasses and used as the primary data exchange format across all layers.
 
-### [Bookmark Domain Data Model](/architecture/architecture-overview/bookmark-domain-data-model)
+### [Bookmark Domain Entity Relationship Diagram](/architecture/architecture-overview/bookmark-domain-entity-relationship-diagram)
 
-The data model for the Pagemark API is centered around three primary domain entities: [Bookmark Model](/api_ref/app/models/bookmark/bookmark), [Tag Model](/api_ref/app/models/tag/tag), and [Collection Model](/api_ref/app/models/collection/collection). 
+This data model diagram represents the core domain entities of the Pagemark API: [Bookmark](/api_ref/app/models/bookmark/bookmark), [Tag](/api_ref/app/models/tag/tag), and [Collection](/api_ref/app/models/collection/collection). 
 
-- **Bookmark**: The core entity representing a saved URL. It contains metadata such as title, description, and status (Active, Archived, Trashed). It maintains a list of associated tag IDs.
-- **Tag**: A label used to organize bookmarks. Each tag has a name, a color, and a usage count that tracks how many bookmarks are currently using it.
-- **Collection**: A grouping mechanism for bookmarks. Collections can be **manual** (where users explicitly add bookmarks) or **smart** (where bookmarks are automatically included based on a `filter_rule`).
+- **Bookmark**: The central entity representing a saved URL. It contains metadata like title, description, and status (Active, Archived, Trashed). It maintains a many-to-many relationship with Tags.
+- **Tag**: A label used to organize bookmarks. It includes a name, color, and a usage count.
+- **Collection**: A grouping mechanism for bookmarks. Collections can be 'manual' (explicitly added) or 'smart' (populated via a filter rule).
 
-The relationships are many-to-many:
-- A **Bookmark** can have multiple **Tags**, and a **Tag** can be applied to multiple **Bookmarks**. This is implemented via a list of tag IDs within the Bookmark entity.
-- A **Collection** can contain multiple **Bookmarks**, and a **Bookmark** can belong to multiple **Collections**. This is implemented via a list of bookmark IDs within the Collection entity.
-
-Note: Although "User" was identified as a key entity in the system classification, the current codebase implements an in-memory repository that does not yet include a formal `User` model or multi-tenant support. References to "users" in the code comments suggest future intent for per-user uniqueness constraints.
+The relationships are implemented using lists of IDs within the dataclasses, representing many-to-many associations between Bookmarks and Tags, and between Collections and Bookmarks. Although a 'User' entity was requested, no such entity or 'user_id' field was found in the current codebase; the system appears to operate in a single-user context or delegates user management to an external layer not reflected in these models.
 
 **Key Architectural Findings:**
-- The system uses a flat, in-memory data model with entities defined as Python dataclasses.
-- Relationships (Bookmark-Tag and Collection-Bookmark) are managed using lists of identifiers rather than formal ORM relationship objects.
-- Enums are used extensively to define states: BookmarkStatus (ACTIVE, ARCHIVED, TRASHED), TagColor (RED, BLUE, etc.), and CollectionType (MANUAL, SMART).
-- Smart Collections use a 'filter_rule' string to dynamically select bookmarks based on title or description matches.
-- The 'User' entity is mentioned in documentation and comments but is not yet implemented as a class or database field.
+- The codebase uses Python dataclasses to define domain models: Bookmark, Tag, and Collection.
+- Relationships are managed via lists of IDs (e.g., Bookmark.tags and Collection.bookmark_ids), indicating many-to-many relationships.
+- Enums are used for entity states and types: BookmarkStatus (ACTIVE, ARCHIVED, TRASHED), TagColor, and CollectionType (MANUAL, SMART).
+- No User entity or user-specific foreign keys were found in the model definitions, despite being mentioned in documentation comments.
+- The Bookmark entity includes a metadata dictionary for extensibility.
 
-### [Bookmark Lifecycle States](/architecture/architecture-overview/bookmark-lifecycle-states)
+### [Bookmark Lifecycle State Machine](/architecture/architecture-overview/bookmark-lifecycle-state-machine)
 
-The state diagram illustrates the lifecycle of a [Bookmark Model](/api_ref/app/models/bookmark/bookmark) entity within the system. 
+This state diagram illustrates the lifecycle of the two primary entities in the Etchblok API: [Bookmark](/api_ref/app/models/bookmark/bookmark) and [Collection](/api_ref/app/models/collection/collection).
 
-### States
-- **Active**: The default state for a newly created bookmark. These bookmarks are typically visible in the user's primary list.
-- **Archived**: A state for bookmarks that the user wants to keep but remove from the active view.
-- **Trashed**: A soft-deleted state. Bookmarks in this state are hidden from normal views but can still be restored.
+The **Bookmark Lifecycle** is governed by the `BookmarkStatus` enum. Every bookmark begins in the `ACTIVE` state upon creation. From there, it can be moved to `ARCHIVED` (for long-term storage) or `TRASHED` (a soft-delete state). The system allows for fluid transitions between these states: a trashed item can be restored to active or moved directly to the archive, and an archived item can be trashed or restored. All state transitions trigger a "touch" operation that updates the `updated_at` timestamp.
 
-### Transitions
-- **Creation**: A bookmark enters the **Active** state upon creation via the `create_bookmark` service method.
-- **Archiving**: A bookmark can be moved to the **Archived** state from either the **Active** or **Trashed** states using the `archive_bookmark` endpoint.
-- **Trashing**: A bookmark is moved to the **Trashed** state via the `delete_bookmark` endpoint (which performs a soft-delete). This can happen from either the **Active** or **Archived** states.
-- **Restoration**: A bookmark in the **Archived** or **Trashed** state can be returned to the **Active** state using the `restore_bookmark` endpoint.
+The **Collection Lifecycle** is defined by the `CollectionType` (Manual vs. Smart) and a pinning mechanism. 
+- **Manual Collections** are user-managed lists where bookmarks are explicitly added or removed.
+- **Smart Collections** are dynamic and populate themselves based on a `filter_rule` (e.g., matching keywords in titles or descriptions).
+- Both types support a **Pinned** state (via the `is_pinned` flag), which determines their visibility in the UI sidebar, although the current REST API implementation primarily focuses on the creation and membership management of these collections.
 
-The architecture uses a soft-delete pattern where the `TRASHED` status acts as a safety net before any potential (though currently unimplemented in the API) hard deletion. All state transitions are handled by the `BookmarkService` which updates the `status` field on the `Bookmark` model and persists the change via the `BookmarkRepository`.
+Key architectural decisions discovered include the use of **soft-deletion** for bookmarks (moving them to `TRASHED` rather than immediate removal) and the **singleton service pattern** (`BookmarkService`) which orchestrates these state changes across the repository and search index.
 
 **Key Architectural Findings:**
-- The Bookmark entity has three primary states: ACTIVE, ARCHIVED, and TRASHED, defined in the BookmarkStatus enum.
-- New bookmarks are initialized to the ACTIVE state by default.
-- The API's DELETE method performs a soft-delete by transitioning the bookmark to the TRASHED state rather than removing it from the database.
-- Transitions between states are fluid; for example, a bookmark can move directly from TRASHED to ARCHIVED or vice versa.
-- The BookmarkRepository contains a hard-delete method (delete_bookmark), but it is not currently exposed through the BookmarkService or the REST API.
+- Bookmarks use a three-state lifecycle: ACTIVE, ARCHIVED, and TRASHED.
+- The 'delete' operation in the BookmarkService is a soft-delete that transitions the entity to the TRASHED state.
+- Restoration (restore_bookmark) always returns a bookmark to the ACTIVE state, regardless of whether it was archived or trashed.
+- Collections are categorized into MANUAL and SMART types at creation, which dictates how their membership is managed.
+- A pinning mechanism (is_pinned) exists in the Collection model to manage UI priority, though it is not yet exposed via the public REST routes.
+- Every state transition in the Bookmark model calls an internal _touch() method to maintain auditability via updated_at timestamps.

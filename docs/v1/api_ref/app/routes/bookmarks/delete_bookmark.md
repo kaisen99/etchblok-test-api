@@ -17,7 +17,7 @@ DELETE /api/bookmarks/< bookmark_id >
 
 | Name | Type | Description |
 |------|------|-------------|
-| **bookmark_id** | `string` | The unique identifier of the bookmark to be moved to the trash. |
+| **bookmark_id** | `string` | The unique identifier of the bookmark to be soft-deleted. |
 
 ## Response
 

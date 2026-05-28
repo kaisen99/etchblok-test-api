@@ -9,20 +9,10 @@ Base configuration shared across all environments.
 
 | Attribute | Type | Description |
 |----------|------|-------------|
-| **SECRET_KEY** | `str` = change-me | Cryptographic key used for signing session cookies and protecting sensitive data, defaulting to an environment variable or a fallback string. |
+| **SECRET_KEY** | `str` = change-me | Cryptographic key used for signing session cookies and securing sensitive data, defaulting to an environment variable or a fallback string. |
 | **DEBUG** | `bool` = false | Flag that enables or disables detailed error pages and development-specific features. |
-| **TESTING** | `bool` = false | Flag that activates testing mode to suppress error logging and enable test-specific behavior during automated suite execution. |
-| **PAGE_SIZE** | `int` = DEFAULT_PAGE_SIZE | The number of items to return per page in paginated responses, which must not exceed the system maximum. |
-
----
-
-## Constructor
-
-### Signature
-
-```python
-def BaseConfig() - > null
-```
+| **TESTING** | `bool` = false | Flag that indicates whether the application is running in a test environment to modify error handling and behavior. |
+| **PAGE_SIZE** | `int` = DEFAULT_PAGE_SIZE | The number of items to return per page in paginated responses, which must not exceed the maximum allowed page size. |
 
 ---
 
@@ -45,6 +35,6 @@ Return cache settings for this environment.
 
 | Type | Description |
 |------|-------------|
-| `Dict[str, Any]` | A dictionary containing the environment-specific cache configuration settings |
+| `Dict[str, Any]` | A dictionary containing the cache configuration parameters used to initialize the caching backend |
 
 ---

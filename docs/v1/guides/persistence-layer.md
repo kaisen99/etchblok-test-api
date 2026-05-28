@@ -1,21 +1,23 @@
 ---
 title: Persistence Layer
-description: In-memory data storage and repository patterns for managing the persistence of bookmarks, tags, and collections.
+description: Data access objects and repositories responsible for in-memory storage and entity lifecycle management.
 code_symbols: [SYM#09a56e7acb86a9afef18a62134c27802cd473050]
-section_id: 25da6f7b-9c8f-4915-abcf-d0b1c862dc8a_persistence_layer
-doc_type: guide
+section_id: 4e572c41-bdc4-4ee1-9379-b4b9b6345d18_persistence_layer
+doc_type: explanation
 section_type: guide
 ---
-The persistence layer in this project is built around an in-memory repository pattern, designed to provide a clean abstraction over data storage. While the current implementation resides entirely in memory, the architecture is structured to allow for future transitions to persistent databases like SQLite or PostgreSQL without altering the service layer logic.
+The persistence layer in this project is designed around an in-memory repository pattern, providing a clean abstraction for data access while maintaining high performance for small-to-medium datasets. This approach decouples the business logic from the underlying storage mechanism, allowing the application to operate without an external database dependency while providing a clear path for future migration to persistent storage.
 
 ## The Repository Pattern
 
-The central hub for data access is the `BookmarkRepository` class located in `app/db/repository.py`. It acts as a mediator between the domain models and the underlying storage mechanism.
+The central component of the persistence layer is the `BookmarkRepository` located in `app/db/repository.py`. It serves as a Data Access Object (DAO) for the three primary domain entities: `Bookmark`, `Tag`, and `Collection`.
 
 ### In-Memory Storage
-The repository maintains three primary collections using Python dictionaries, where keys are unique identifiers (UUIDs) and values are the domain model instances:
+The repository uses standard Python dictionaries to store entities, keyed by their unique identifiers. This ensures $O(1)$ lookup times for individual items.
 
 ```python
+# app/db/repository.py
+
 class BookmarkRepository:
     def __init__(self) -> None:
         self._bookmarks: Dict[str, Bookmark] = {}
@@ -23,108 +25,98 @@ class BookmarkRepository:
         self._collections: Dict[str, Collection] = {}
 ```
 
-### CRUD Operations
-The repository provides standard CRUD methods for each entity. These methods perform immediate mutations on the internal dictionaries. For example, the bookmark operations are implemented as follows:
+Because the storage is in-memory, all mutation methods like `save_bookmark` or `delete_tag` persist changes immediately to the internal state. However, this data is ephemeral and is lost when the application process restarts.
+
+### Pagination and Filtering
+The repository implements basic pagination and filtering logic within the `list_bookmarks` method. It returns a tuple containing the requested slice of items and the total count of matching items, which is a common pattern for supporting frontend pagination controls.
 
 ```python
-def save_bookmark(self, bookmark: Bookmark) -> None:
-    """Insert or update a bookmark."""
-    self._bookmarks[bookmark.id] = bookmark
+# app/db/repository.py
 
-def get_bookmark(self, bookmark_id: str) -> Optional[Bookmark]:
-    """Retrieve a bookmark by ID, or None."""
-    return self._bookmarks.get(bookmark_id)
-
-def delete_bookmark(self, bookmark_id: str) -> bool:
-    """Hard-delete a bookmark. Returns True if it existed."""
-    return self._bookmarks.pop(bookmark_id, None) is not None
+def list_bookmarks(
+    self,
+    page: int = 1,
+    per_page: int = 25,
+    status: Optional[str] = None,
+) -> Tuple[List[Bookmark], int]:
+    items = list(self._bookmarks.values())
+    if status:
+        try:
+            target = BookmarkStatus(status)
+            items = [b for b in items if b.status == target]
+        except ValueError:
+            pass
+    items.sort(key=lambda b: b.created_at, reverse=True)
+    total = len(items)
+    start = (page - 1) * per_page
+    return items[start : start + per_page], total
 ```
 
-## Domain Models and Serialization
+## Full-Text Search Indexing
 
-Persistence is managed using three core domain entities found in the `app/models/` directory. Each model is implemented as a Python `dataclass` and includes methods for serialization to and from dictionaries, facilitating both storage and API communication.
+To support efficient searching without a traditional database's `LIKE` or `MATCH` queries, the project implements a `SearchIndex` in `app/services/search_service.py`. This class maintains an inverted index that maps lowercase tokens to sets of bookmark IDs.
 
-### Core Entities
-- **Bookmark (`app/models/bookmark.py`)**: Represents a saved URL with metadata, status (Active, Archived, Trashed), and a list of associated tag IDs.
-- **Tag (`app/models/tag.py`)**: Represents a label with a name and color. It tracks its own `usage_count` across bookmarks.
-- **Collection (`app/models/collection.py`)**: Groups bookmarks. It supports **Manual** collections (explicit ID lists) and **Smart** collections (dynamic filtering based on a `filter_rule`).
-
-### Serialization Example
-The `Bookmark` model uses `to_dict` for serialization and a class method `from_dict` for instantiation from raw data:
+### Index Lifecycle
+The `SearchIndex` is tightly coupled with the `BookmarkRepository`. Upon initialization, it performs a full rebuild by iterating through all bookmarks in the repository.
 
 ```python
-def to_dict(self) -> Dict[str, Any]:
-    return {
-        "id": self.id,
-        "url": self.url,
-        "title": self.title,
-        "tags": self.tags,
-        "status": self.status.value,
-        "created_at": self.created_at.isoformat(),
-        # ... other fields
-    }
-```
+# app/services/search_service.py
 
-## Search and Indexing
-
-To support full-text search without a traditional database, the project implements a `SearchIndex` in `app/services/search_service.py`. This is an inverted index that maps tokens (words) to bookmark IDs.
-
-The index is initialized by scanning the repository and is updated incrementally whenever bookmarks are saved or removed:
-
-```python
 class SearchIndex:
     def __init__(self, repository: "BookmarkRepository") -> None:
         self._repo = repository
         self._index: Dict[str, Set[str]] = defaultdict(set)
         self._rebuild()
 
-    def index_bookmark(self, bookmark: Bookmark) -> None:
-        self._remove_bookmark_from_index(bookmark.id)
-        tokens = self._tokenize(f"{bookmark.title} {bookmark.description}")
-        for token in tokens:
-            self._index[token].add(bookmark.id)
+    def _rebuild(self) -> None:
+        """Rebuild the entire index from the repository."""
+        self._index.clear()
+        all_bookmarks, _ = self._repo.list_bookmarks(page=1, per_page=10000)
+        for bookmark in all_bookmarks:
+            self.index_bookmark(bookmark)
 ```
 
-## Caching Layer
+### Search Execution
+When a search is performed via `search()`, the index AND-es the tokens from the query. It then retrieves the actual `Bookmark` objects from the repository using the IDs found in the index.
 
-Performance for frequent lookups is optimized using an `LRUCache` (Least-Recently-Used) found in `app/services/_cache.py`. The `BookmarkService` uses this cache to store `Bookmark` objects, reducing the need to query the repository directly for repeated requests.
+```python
+# app/services/search_service.py
 
-The cache is automatically invalidated when a bookmark is updated or deleted to ensure data consistency:
+def search(self, query: str, limit: int = 20) -> List[Bookmark]:
+    tokens = self._tokenize(query)
+    # ... logic to find candidate_ids ...
+    results = []
+    for bid in candidate_ids:
+        bookmark = self._repo.get_bookmark(bid)
+        if bookmark:
+            results.append(bookmark)
+    return self._rank_results(results, tokens)[:limit]
+```
+
+## Internal Connection Pooling Stub
+
+While the current implementation is strictly in-memory, the codebase includes an internal `_ConnectionPool` and `_Connection` class in `app/db/_connection.py`. These classes are marked as internal (prefixed with underscores) and serve as a "future-proofing" stub.
+
+The `_ConnectionPool` is designed to be thread-safe, using a `threading.Lock` to manage a pool of reusable connections. This structure suggests that the project is prepared to transition to a thread-safe database driver (like `psycopg2` or `sqlite3`) in the future without significant architectural changes to the repository layer.
+
+## Service Layer Orchestration
+
+The `BookmarkService` in `app/services/bookmark_service.py` acts as a facade that orchestrates the repository and the search index. It ensures that when data is modified in the repository, the search index is updated accordingly.
 
 ```python
 # app/services/bookmark_service.py
-def update_bookmark(self, bookmark_id: str, data: dict) -> Optional[Bookmark]:
-    bookmark = self._repo.get_bookmark(bookmark_id)
-    if bookmark:
-        # ... update logic ...
-        self._repo.save_bookmark(bookmark)
-        self._cache.put(bookmark.id, bookmark)  # Update cache
-        self._search.index_bookmark(bookmark)   # Update search index
-    return bookmark
+
+def _init_services(self) -> None:
+    """Bootstrap repository, cache, and search index."""
+    self._repo = BookmarkRepository()
+    self._cache: LRUCache[Bookmark] = LRUCache(max_size=256)
+    self._search = SearchIndex(self._repo)
 ```
 
-## Data Integrity and Lifecycle
+This orchestration ensures that the persistence layer remains a passive data store, while the service layer handles the side effects of data mutations, such as cache invalidation and search index updates.
 
-Because the repository is in-memory and lacks built-in relational constraints, the `BookmarkService` in `app/services/bookmark_service.py` is responsible for maintaining data integrity across different entities.
+## Design Tradeoffs
 
-For instance, when a `Tag` is deleted, the service layer must iterate through all associated bookmarks to remove the tag reference and update the cache:
-
-```python
-def delete_tag(self, tag_id: str) -> bool:
-    tag = self._repo.get_tag(tag_id)
-    if not tag:
-        return False
-    # Clean up references in bookmarks
-    for bookmark in self._repo.get_bookmarks_with_tag(tag_id):
-        bookmark.remove_tag(tag_id)
-        self._repo.save_bookmark(bookmark)
-        self._cache.invalidate(bookmark.id)
-    self._repo.delete_tag(tag_id)
-    return True
-```
-
-## Limitations and Considerations
-
-- **Volatility**: All data is stored in volatile memory. Restarting the application process results in the loss of all bookmarks, tags, and collections.
-- **No Transactions**: The `BookmarkRepository` does not support atomic transactions. If a multi-step operation (like the tag deletion shown above) fails midway, the data may be left in an inconsistent state.
-- **Scaling**: The `SearchIndex` is rebuilt entirely on startup, which may impact initialization time as the number of bookmarks grows.
+1.  **Volatility**: The most significant tradeoff is the lack of durability. Since data is stored in-memory, it does not survive application restarts. This is suitable for the current "test-api" scope but would require the implementation of the `_ConnectionPool` for production use.
+2.  **Memory Usage**: As the number of bookmarks grows, memory consumption increases linearly. The `SearchIndex` also duplicates some data (tokens) in memory to facilitate fast lookups.
+3.  **Initialization Overhead**: The `SearchIndex` rebuilds itself on startup. While fast for the current limit of 10,000 items, this would become a bottleneck for significantly larger datasets.

@@ -26,7 +26,7 @@ The kind of collection.
 def MANUAL()
 ```
 
-Represents a collection where items are added and removed by the user manually.
+Represents a collection where items are added and removed manually by the user.
 
 ---
 
@@ -36,6 +36,6 @@ Represents a collection where items are added and removed by the user manually.
 def SMART()
 ```
 
-Represents a collection that automatically updates its contents based on predefined filtering rules or criteria.
+Represents a collection that automatically includes items based on predefined filtering rules or criteria.
 
 ---
