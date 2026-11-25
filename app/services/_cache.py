@@ -77,3 +77,5 @@ class LRUCache(Generic[T]):
             key, _ = self._store.popitem(last=False)
             return key
         return None
+
+# Refresh timing probe 2026-11-25T21:19:01Z
